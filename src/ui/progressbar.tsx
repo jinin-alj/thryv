@@ -1,9 +1,13 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { colors } from "../theme/colors";
+import { useAppTheme } from "../theme/themeContext";
 
 export default function ProgressBar({ value }: { value: number }) {
+  const { theme } = useAppTheme();
+  const styles = makeStyles(theme);
+
   const clamped = Math.max(0, Math.min(1, value));
+
   return (
     <View style={styles.track}>
       <View style={[styles.fill, { width: `${clamped * 100}%` }]} />
@@ -11,16 +15,17 @@ export default function ProgressBar({ value }: { value: number }) {
   );
 }
 
-const styles = StyleSheet.create({
-  track: {
-    height: 10,
-    borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.10)",
-    overflow: "hidden",
-  },
-  fill: {
-    height: 10,
-    borderRadius: 999,
-    backgroundColor: colors.primary,
-  },
-});
+const makeStyles = (theme: any) =>
+  StyleSheet.create({
+    track: {
+      height: 10,
+      borderRadius: 999,
+      backgroundColor: theme.border,
+      overflow: "hidden",
+    },
+    fill: {
+      height: 10,
+      borderRadius: 999,
+      backgroundColor: theme.primary,
+    },
+  });

@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, Text, StyleSheet, ViewStyle } from "react-native";
-import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
+import { useAppTheme } from "../theme/themeContext";
 
 export default function PrimaryButton({
   title,
@@ -14,6 +14,9 @@ export default function PrimaryButton({
   disabled?: boolean;
   style?: ViewStyle;
 }) {
+  const { theme } = useAppTheme();
+  const styles = makeStyles(theme);
+
   return (
     <Pressable
       onPress={onPress}
@@ -30,14 +33,15 @@ export default function PrimaryButton({
   );
 }
 
-const styles = StyleSheet.create({
-  btn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  txt: { color: colors.text, fontSize: 16, fontWeight: "800" },
-});
+const makeStyles = (theme: any) =>
+  StyleSheet.create({
+    btn: {
+      backgroundColor: theme.primary,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    txt: { color: theme.text, fontSize: 16, fontWeight: "800" },
+  });

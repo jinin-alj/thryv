@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Switch } from "react-native";
-import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
-import { getJSON, setJSON, Keys, Profile, GameRun } from "../storage/local";
+import { useAppTheme } from "../theme/themeContext";
+import {
+  getJSON,
+  setJSON,
+  Keys,
+  Profile,
+  GameRun,
+} from "../storage/local";
 
 export default function ProfileScreen() {
+  const { theme, toggleTheme, mode } = useAppTheme();
+  const styles = makeStyles(theme);
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [runs, setRuns] = useState<GameRun[]>([]);
 
@@ -30,46 +39,127 @@ export default function ProfileScreen() {
 
       <View style={styles.card}>
         <Text style={styles.label}>Streak</Text>
-        <Text style={styles.big}>{profile?.streakDays ?? 0} days</Text>
+        <Text style={styles.big}>
+          {profile?.streakDays ?? 0} days
+        </Text>
 
         <View style={{ height: spacing.md }} />
 
-        <Text style={styles.label}>Total runs</Text>
-        <Text style={styles.big}>{profile?.totalRuns ?? 0}</Text>
+        <Text style={styles.label}>Total Runs</Text>
+        <Text style={styles.big}>
+          {profile?.totalRuns ?? 0}
+        </Text>
 
         <View style={{ height: spacing.md }} />
 
         <View style={styles.row}>
-          <Text style={[styles.label, { marginBottom: 0 }]}>Premium (demo)</Text>
+          <Text style={styles.label}>Premium (Demo)</Text>
           <Switch
             value={!!profile?.isPremium}
             onValueChange={togglePremium}
           />
         </View>
-        <Text style={styles.small}>Toggle to test freemium gating in Games.</Text>
+
+        <View style={{ height: spacing.md }} />
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Dark Mode</Text>
+          <Switch
+            value={mode === "dark"}
+            onValueChange={toggleTheme}
+          />
+        </View>
       </View>
 
       <View style={{ height: spacing.lg }} />
 
       <View style={styles.card}>
-        <Text style={styles.label}>Recent scores</Text>
+        <Text style={styles.label}>Recent Results</Text>
+
+        {runs.length === 0 && (
+          <Text style={styles.empty}>No runs yet.</Text>
+        )}
+
         {runs.slice(0, 5).map((r) => (
-          <Text key={r.id} style={styles.small}>
-            • {r.focusScore}/100 — {Math.round(r.accuracy * 100)}% — L{r.difficultyLevel}
-          </Text>
+          <View key={r.id} style={styles.resultRow}>
+            <Text style={styles.resultScore}>
+              {r.focusScore}/100
+            </Text>
+            <Text style={styles.resultDetail}>
+              {Math.round(r.accuracy * 100)}% · L{r.difficultyLevel}
+            </Text>
+          </View>
         ))}
-        {!runs.length ? <Text style={styles.small}>No runs yet.</Text> : null}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.xl },
-  h: { color: colors.text, fontSize: 28, fontWeight: "900" },
-  card: { backgroundColor: colors.card, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
-  label: { color: colors.muted, fontWeight: "800", marginBottom: 6 },
-  big: { color: colors.text, fontSize: 32, fontWeight: "900" },
-  small: { color: colors.muted, marginTop: 6, fontWeight: "700", lineHeight: 18 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-});
+const makeStyles = (theme: any) =>
+  StyleSheet.create({
+    wrap: {
+      flex: 1,
+      backgroundColor: theme.background,
+      padding: spacing.xl,
+    },
+
+    h: {
+      color: theme.text, // PURE WHITE in dark mode
+      fontSize: 28,
+      fontWeight: "900",
+    },
+
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: spacing.lg,
+    },
+
+    label: {
+      color: theme.text, // IMPORTANT: use white, not muted
+      fontWeight: "800",
+      fontSize: 14,
+    },
+
+    big: {
+      color: theme.text,
+      fontSize: 32,
+      fontWeight: "900",
+      marginTop: 4,
+    },
+
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+
+    resultRow: {
+      marginTop: 8,
+      paddingVertical: 6,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+
+    resultScore: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: "900",
+    },
+
+    resultDetail: {
+      color: theme.text, // white for readability
+      fontSize: 13,
+      fontWeight: "600",
+      marginTop: 2,
+    },
+
+    empty: {
+      color: theme.text,
+      marginTop: 8,
+      fontWeight: "600",
+      opacity: 0.7,
+    },
+  });

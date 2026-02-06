@@ -1,132 +1,144 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { colors } from "../theme/colors";
+import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
+import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import ProgressBar from "../ui/progressbar";
-import PrimaryButton from "../ui/primarybutton";
 import { createRun, finishRun } from "../game/gonogo/engine";
-import { difficultyForLevel, adaptLevel } from "../game/gonogo/difficulty";
+import { difficultyForLevel } from "../game/gonogo/difficulty";
 import { Stimulus, RunStats } from "../game/gonogo/types";
-import { getJSON, setJSON, Keys, GameRun, Profile, todayKey } from "../storage/local";
+import { getJSON, setJSON, Keys, GameRun } from "../storage/local";
 
 function uid() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
+const MAX_LEVEL = 3;
+const RUNS_PER_LEVEL = 3;
+
 export default function GoNoGoGame({
-  onExit,
   onFinished,
 }: {
-  onExit: () => void;
   onFinished: () => void;
 }) {
+  const { theme } = useAppTheme();
+  const styles = makeStyles(theme);
+
   const totalTrials = 20;
 
-  const [level, setLevel] = useState(3);
+  const [level, setLevel] = useState(1);
+  const [totalRuns, setTotalRuns] = useState(0);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+
+  const levelUpAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    (async () => {
+      const runs = await getJSON<GameRun[]>(Keys.runs, []);
+      setTotalRuns(runs.length);
+      setLevel(Math.min(MAX_LEVEL, 1 + Math.floor(runs.length / RUNS_PER_LEVEL)));
+    })();
+  }, []);
+
+  const runsIntoLevel = totalRuns % RUNS_PER_LEVEL;
+  const runsRemaining =
+    level < MAX_LEVEL ? RUNS_PER_LEVEL - runsIntoLevel : 0;
+
+  const xpProgress =
+    level === MAX_LEVEL ? 1 : runsIntoLevel / RUNS_PER_LEVEL;
+
   const diff = useMemo(() => difficultyForLevel(level), [level]);
 
   const [stimuli, setStimuli] = useState<Stimulus[]>(() =>
     createRun({ totalTrials, difficulty: diff })
   );
+
   const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState<"READY" | "SHOW" | "ISI" | "DONE">("READY");
+  const [phase, setPhase] = useState<"SHOW" | "ISI" | "DONE">("SHOW");
   const [nowStimulus, setNowStimulus] = useState<Stimulus | null>(null);
 
-  const startedAtRef = useRef<string>(new Date().toISOString());
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function clearTimer() {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
   }
 
-  useEffect(() => {
-    // regenerate run if difficulty changes before start
-    if (phase === "READY") {
-      setStimuli(createRun({ totalTrials, difficulty: diff }));
-      setIndex(0);
-      setNowStimulus(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [diff.level]);
-
+  // SHOW / ISI timing
   useEffect(() => {
     clearTimer();
+
     if (phase === "SHOW") {
       timerRef.current = setTimeout(() => {
-        // if GO and no response => wrong; if NOGO and no response => correct
         setStimuli((prev) => {
           const copy = [...prev];
           const s = copy[index];
           if (s && s.respondedAt == null) {
-            const correct = s.kind === "NOGO";
-            copy[index] = { ...s, correct, reactionMs: null };
+            copy[index] = { ...s, correct: s.kind === "NOGO", reactionMs: null };
           }
           return copy;
         });
         setPhase("ISI");
       }, diff.stimulusMs);
-    } else if (phase === "ISI") {
+    }
+
+    if (phase === "ISI") {
       timerRef.current = setTimeout(() => {
-        const nextIndex = index + 1;
-        if (nextIndex >= stimuli.length) {
-          setPhase("DONE");
-        } else {
-          setIndex(nextIndex);
+        const next = index + 1;
+        if (next >= stimuli.length) setPhase("DONE");
+        else {
+          setIndex(next);
           setPhase("SHOW");
         }
       }, diff.isiMs);
     }
+
     return clearTimer;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, index]);
 
+  // FLASHING FIX: explicitly hide stimulus during ISI
   useEffect(() => {
     if (phase === "SHOW") {
-      setNowStimulus(() => {
-        const s = stimuli[index];
-        return s ? { ...s, shownAt: Date.now() } : null;
-      });
+      const s = stimuli[index];
+      setNowStimulus(s ? { ...s, shownAt: Date.now() } : null);
     } else {
       setNowStimulus(null);
     }
-  }, [phase, index, stimuli]);
-
-  function start() {
-    startedAtRef.current = new Date().toISOString();
-    setIndex(0);
-    setPhase("SHOW");
-  }
+  }, [phase, index]);
 
   function tap() {
     if (phase !== "SHOW") return;
-    const shownAt = nowStimulus?.shownAt ?? Date.now();
-    const respondedAt = Date.now();
-    const reactionMs = Math.max(0, respondedAt - shownAt);
 
     setStimuli((prev) => {
       const copy = [...prev];
       const s = copy[index];
       if (!s) return prev;
 
-      // GO => tap is correct; NOGO => tap is wrong
-      const correct = s.kind === "GO";
-      copy[index] = { ...s, shownAt, respondedAt, reactionMs, correct };
+      copy[index] = {
+        ...s,
+        respondedAt: Date.now(),
+        reactionMs: Date.now() - (s.shownAt ?? Date.now()),
+        correct: s.kind === "GO",
+      };
+
       return copy;
     });
 
-    // immediately move to ISI after response
     setPhase("ISI");
   }
 
-  async function persistAndFinish(stats: RunStats) {
-    const endedAt = new Date().toISOString();
+  useEffect(() => {
+    if (phase === "DONE") {
+      const stats = finishRun(stimuli);
+      persist(stats);
+    }
+  }, [phase]);
 
+  async function persist(stats: RunStats) {
     const run: GameRun = {
       id: uid(),
       game: "gonogo",
-      startedAt: startedAtRef.current,
-      endedAt,
+      startedAt: new Date().toISOString(),
+      endedAt: new Date().toISOString(),
       accuracy: stats.accuracy,
       avgReactionMs: stats.avgReactionMs,
       focusScore: stats.focusScore,
@@ -137,116 +149,164 @@ export default function GoNoGoGame({
       noGoWrong: stats.noGoWrong,
     };
 
-    // Save last run + append to runs
     const runs = await getJSON<GameRun[]>(Keys.runs, []);
-    await setJSON(Keys.runs, [run, ...runs].slice(0, 50));
-    await setJSON(Keys.lastRun, run);
+    const newRuns = [run, ...runs];
+    await setJSON(Keys.runs, newRuns);
 
-    // Update profile streak + totals
-    const profile = await getJSON<Profile>(Keys.profile, {
-      createdAt: new Date().toISOString(),
-      totalRuns: 0,
-      streakDays: 0,
-      lastActiveDate: todayKey(),
-      isPremium: false,
-    });
+    const newLevel = Math.min(
+      MAX_LEVEL,
+      1 + Math.floor(newRuns.length / RUNS_PER_LEVEL)
+    );
 
-    const today = todayKey();
-    let streak = profile.streakDays;
-    if (profile.lastActiveDate !== today) {
-      // if yesterday then +1 else reset to 1
-      const prev = new Date(profile.lastActiveDate + "T00:00:00");
-      const cur = new Date(today + "T00:00:00");
-      const diffDays = Math.round((cur.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-      streak = diffDays === 1 ? Math.max(1, streak + 1) : 1;
-    } else if (streak === 0) {
-      streak = 1;
+    if (newLevel > level) {
+      await playLevelUpAnimation();
     }
-
-    await setJSON(Keys.profile, {
-      ...profile,
-      totalRuns: profile.totalRuns + 1,
-      lastActiveDate: today,
-      streakDays: streak,
-    });
-
-    // Adapt difficulty next time
-    const nextLevel = adaptLevel(level, stats);
-    await setJSON("thryv:gonogo:level", nextLevel);
 
     onFinished();
   }
 
-  useEffect(() => {
-    (async () => {
-      const saved = await getJSON<number>("thryv:gonogo:level", 3);
-      setLevel(saved);
-    })();
-  }, []);
+  function playLevelUpAnimation(): Promise<void> {
+    return new Promise((resolve) => {
+      setShowLevelUp(true);
+      Animated.sequence([
+        Animated.timing(levelUpAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.delay(600),
+        Animated.timing(levelUpAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowLevelUp(false);
+        resolve();
+      });
+    });
+  }
 
-  useEffect(() => {
-    if (phase === "DONE") {
-      const stats = finishRun(stimuli);
-      persistAndFinish(stats).catch(() => onFinished());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
-  const progress = (index / totalTrials);
-
+  const progress = index / totalTrials;
   const kind = nowStimulus?.kind;
   const isGo = kind === "GO";
 
   return (
     <View style={styles.wrap}>
       <Text style={styles.h}>Go / No-Go</Text>
-      <Text style={styles.sub}>Tap on GO. Don’t tap on NO-GO.</Text>
+      <Text style={styles.level}>Level {level}</Text>
+
+      <Text style={styles.xpLabel}>XP Progress</Text>
+      <ProgressBar value={xpProgress} />
+
+      {level < MAX_LEVEL && (
+        <Text style={styles.xpText}>
+          {runsRemaining} run(s) until next level
+        </Text>
+      )}
+
+      {showLevelUp && (
+        <Animated.Text
+          style={[
+            styles.levelUp,
+            {
+              opacity: levelUpAnim,
+              transform: [{ scale: levelUpAnim }],
+            },
+          ]}
+        >
+          LEVEL UP!
+        </Animated.Text>
+      )}
 
       <View style={{ height: spacing.md }} />
       <ProgressBar value={progress} />
-      <Text style={styles.meta}>Difficulty L{level} • Trial {Math.min(index + 1, totalTrials)}/{totalTrials}</Text>
 
-      <View style={{ flex: 1 }} />
-
-      {phase === "READY" ? (
-        <View style={{ gap: spacing.sm }}>
-          <PrimaryButton title="Start 2-min Sprint" onPress={start} />
-          <PrimaryButton title="Exit" onPress={onExit} style={{ backgroundColor: colors.card }} />
-        </View>
-      ) : (
+      <View style={styles.center}>
         <Pressable onPress={tap} style={styles.pad}>
-          <View style={[
-            styles.stimulus,
-            kind === "GO" ? { backgroundColor: colors.success } : null,
-            kind === "NOGO" ? { backgroundColor: colors.danger } : null,
-            !kind ? { backgroundColor: "rgba(255,255,255,0.08)" } : null,
-          ]}>
-            <Text style={styles.stxt}>{kind ? (isGo ? "GO" : "NO") : ""}</Text>
+          <View
+            style={[
+              styles.stimulus,
+              kind === "GO" && { backgroundColor: theme.primary },
+              kind === "NOGO" && { backgroundColor: theme.danger },
+            ]}
+          >
+            <Text style={styles.stxt}>
+              {kind ? (isGo ? "GO" : "NO") : ""}
+            </Text>
           </View>
-          <Text style={styles.hint}>{kind ? (isGo ? "TAP" : "DON'T TAP") : ""}</Text>
+          <Text style={styles.hint}>
+            {kind ? (isGo ? "TAP" : "DON’T TAP") : ""}
+          </Text>
         </Pressable>
-      )}
-
-      <View style={{ flex: 1 }} />
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.xl },
-  h: { color: colors.text, fontSize: 28, fontWeight: "900" },
-  sub: { color: colors.muted, marginTop: 6, fontWeight: "700" },
-  meta: { color: colors.muted, marginTop: spacing.sm, fontWeight: "700", fontSize: 12, opacity: 0.85 },
-  pad: { alignItems: "center", justifyContent: "center", gap: spacing.md },
-  stimulus: {
-    width: 220,
-    height: 220,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  stxt: { color: colors.text, fontSize: 44, fontWeight: "900" },
-  hint: { color: colors.muted, fontWeight: "900", letterSpacing: 2 },
-});
+const makeStyles = (theme: any) =>
+  StyleSheet.create({
+    wrap: {
+      flex: 1,
+      backgroundColor: theme.background,
+      padding: spacing.xl,
+    },
+    h: {
+      color: theme.text,
+      fontSize: 28,
+      fontWeight: "900",
+    },
+    level: {
+      color: theme.primary,
+      fontWeight: "800",
+      marginBottom: 6,
+    },
+    xpLabel: {
+      color: theme.text,
+      fontSize: 12,
+      fontWeight: "800",
+      marginBottom: 4,
+    },
+    xpText: {
+      color: theme.text,
+      fontSize: 12,
+      marginTop: 4,
+      fontWeight: "600",
+    },
+    levelUp: {
+      position: "absolute",
+      top: 120,
+      alignSelf: "center",
+      color: theme.success,
+      fontSize: 30,
+      fontWeight: "900",
+      zIndex: 10,
+    },
+    center: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    pad: {
+      alignItems: "center",
+      gap: spacing.md,
+    },
+    stimulus: {
+      width: 220,
+      height: 220,
+      borderRadius: 36,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    stxt: {
+      color: theme.text,
+      fontSize: 44,
+      fontWeight: "900",
+    },
+    hint: {
+      color: theme.text,
+      fontWeight: "900",
+    },
+  });

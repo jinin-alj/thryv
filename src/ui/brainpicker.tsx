@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
+import { useAppTheme } from "../theme/themeContext";
 
 export type BrainGame = {
   id: "gonogo";
@@ -19,6 +19,9 @@ export default function BrainPicker({
   selectedId: BrainGame["id"];
   onSelect: (id: BrainGame["id"]) => void;
 }) {
+  const { theme } = useAppTheme();
+  const styles = makeStyles(theme);
+
   return (
     <View style={{ gap: spacing.sm }}>
       {games.map((g) => {
@@ -29,7 +32,7 @@ export default function BrainPicker({
             onPress={() => onSelect(g.id)}
             style={[
               styles.card,
-              active ? { borderColor: colors.primary } : null,
+              active ? { borderColor: theme.primary } : null,
             ]}
           >
             <View style={{ flex: 1 }}>
@@ -44,18 +47,19 @@ export default function BrainPicker({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  title: { color: colors.text, fontSize: 16, fontWeight: "800" },
-  sub: { color: colors.muted, marginTop: 4, fontSize: 13, fontWeight: "600" },
-  mins: { color: colors.muted, fontSize: 12, fontWeight: "800" },
-});
+const makeStyles = (theme: any) =>
+  StyleSheet.create({
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: spacing.md,
+      gap: spacing.md,
+    },
+    title: { color: theme.text, fontSize: 16, fontWeight: "800" },
+    sub: { color: theme.mutedText, marginTop: 4, fontSize: 13, fontWeight: "600" },
+    mins: { color: theme.mutedText, fontSize: 12, fontWeight: "800" },
+  });
