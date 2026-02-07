@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Switch } from "react-native";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
   getJSON,
   setJSON,
@@ -32,7 +34,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Profile</Text>
 
       <View style={{ height: spacing.lg }} />
@@ -91,7 +93,7 @@ export default function ProfileScreen() {
           </View>
         ))}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

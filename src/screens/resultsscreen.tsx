@@ -6,6 +6,8 @@ import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
 import { getJSON, Keys, GameRun } from "../storage/local";
 import PrimaryButton from "../ui/primarybutton";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Results">;
 
@@ -24,14 +26,14 @@ export default function ResultsScreen({ navigation }: Props) {
 
   if (!run) {
     return (
-      <View style={styles.wrap}>
+      <SafeAreaView style={styles.wrap}>
         <Text style={styles.h}>Loading results…</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Your Results</Text>
 
       <View style={{ height: spacing.lg }} />
@@ -53,7 +55,7 @@ export default function ResultsScreen({ navigation }: Props) {
         title="Back to Home"
         onPress={() => navigation.replace("Home")}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

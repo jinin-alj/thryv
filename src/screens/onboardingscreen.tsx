@@ -6,6 +6,8 @@ import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
 import PrimaryButton from "../ui/primarybutton";
 import { setString, Keys, getJSON, setJSON, Profile, todayKey } from "../storage/local";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Onboarding">;
 
@@ -29,7 +31,7 @@ export default function OnboardingScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>How it works</Text>
 
       <View style={styles.card}>
@@ -49,7 +51,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 
       <View style={{ height: spacing.lg }} />
       <PrimaryButton title="Continue" onPress={finish} />
-    </View>
+    </SafeAreaView>
   );
 }
 

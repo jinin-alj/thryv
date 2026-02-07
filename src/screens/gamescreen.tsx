@@ -6,6 +6,8 @@ import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import GoNoGoGame from "./gonogo_screen";
 import { getJSON, Keys, GameRun } from "../storage/local";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Games">;
 
@@ -24,9 +26,9 @@ export default function GameScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <GoNoGoGame onFinished={handleFinished} />
-    </View>
+    </SafeAreaView>
   );
 }
 

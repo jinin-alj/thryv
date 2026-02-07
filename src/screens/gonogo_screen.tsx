@@ -7,6 +7,8 @@ import { createRun, finishRun } from "../game/gonogo/engine";
 import { difficultyForLevel } from "../game/gonogo/difficulty";
 import { Stimulus, RunStats } from "../game/gonogo/types";
 import { getJSON, setJSON, Keys, GameRun } from "../storage/local";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 function uid() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
@@ -63,7 +65,6 @@ export default function GoNoGoGame({
     timerRef.current = null;
   }
 
-  // SHOW / ISI timing
   useEffect(() => {
     clearTimer();
 
@@ -95,7 +96,6 @@ export default function GoNoGoGame({
     return clearTimer;
   }, [phase, index]);
 
-  // FLASHING FIX: explicitly hide stimulus during ISI
   useEffect(() => {
     if (phase === "SHOW") {
       const s = stimuli[index];
@@ -192,7 +192,7 @@ export default function GoNoGoGame({
   const isGo = kind === "GO";
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Go / No-Go</Text>
       <Text style={styles.level}>Level {level}</Text>
 
@@ -240,7 +240,7 @@ export default function GoNoGoGame({
           </Text>
         </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

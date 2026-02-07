@@ -3,6 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
 import PrimaryButton from "../ui/primarybutton";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 const facts = [
   "Attention is a limited resource — doom-scrolling makes refocusing harder.",
@@ -19,7 +21,7 @@ export default function FunFactScreen() {
   const styles = makeStyles(theme);
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Fun facts</Text>
 
       <View style={styles.card}>
@@ -28,7 +30,7 @@ export default function FunFactScreen() {
 
       <View style={{ height: spacing.lg }} />
       <PrimaryButton title="New fact" onPress={() => setSeed((s) => s + 1)} />
-    </View>
+    </SafeAreaView>
   );
 }
 

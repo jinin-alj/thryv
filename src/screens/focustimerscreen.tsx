@@ -6,6 +6,7 @@ import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import PrimaryButton from "../ui/primarybutton";
 import ProgressBar from "../ui/progressbar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FocusTimer">;
 
@@ -69,7 +70,7 @@ export default function FocusTimerScreen({ navigation }: Props) {
   const progress = 1 - remaining / total;
 
   return (
-    <View style={styles.wrap}>
+    <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Focus Timer</Text>
       <Text style={styles.sub}>
         {mode === "FOCUS" ? "Focus block" : "Break"}
@@ -134,7 +135,7 @@ export default function FocusTimerScreen({ navigation }: Props) {
       <Text style={styles.footer}>
         Tip: During breaks, play a 2-minute sprint instead of scrolling.
       </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 

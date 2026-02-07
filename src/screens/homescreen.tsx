@@ -6,6 +6,8 @@ import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import PrimaryButton from "../ui/primarybutton";
 import { getJSON, Keys, Profile, GameRun } from "../storage/local";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -22,7 +24,7 @@ export default function HomeScreen({ navigation }: Props) {
   }, []);
 
   return (
-    <View style={[styles.wrap, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.wrap, { backgroundColor: theme.background }]}>
       <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
       <Text style={[styles.sub, { color: theme.muted }]}>
         Prime your brain. Then crush the study block.
@@ -30,7 +32,7 @@ export default function HomeScreen({ navigation }: Props) {
 
       <View style={{ height: spacing.lg }} />
 
-      {/* ✅ THIS GOES TO GAME SCREEN */}
+      {/* THIS GOES TO GAME SCREEN */}
       <PrimaryButton
         title="Play"
         onPress={() => navigation.navigate("Games")}
@@ -38,7 +40,7 @@ export default function HomeScreen({ navigation }: Props) {
 
       <View style={{ height: spacing.sm }} />
 
-      {/* ✅ THIS GOES TO TIMER */}
+      {/* THIS GOES TO TIMER */}
       <PrimaryButton
         title="Focus Timer"
         onPress={() => navigation.navigate("FocusTimer")}
@@ -62,7 +64,7 @@ export default function HomeScreen({ navigation }: Props) {
       />
 
       <View style={{ flex: 1 }} />
-    </View>
+    </SafeAreaView>
   );
 }
 

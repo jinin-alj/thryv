@@ -4,6 +4,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { useAppTheme } from "../theme/themeContext";
 import { getString, Keys } from "../storage/local";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Start">;
 
@@ -22,9 +24,9 @@ export default function StartScreen({ navigation }: Props) {
   }, []);
 
   return (
-    <View style={[styles.wrap, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.wrap, { backgroundColor: theme.background }]}>
       <ActivityIndicator size="large" color={theme.primary} />
-    </View>
+    </SafeAreaView>
   );
 }
 
