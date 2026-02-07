@@ -8,7 +8,7 @@ import GoNoGoGame from "./gonogo_screen";
 import { getJSON, Keys, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Games">;
+type Props = NativeStackScreenProps<RootStackParamList, "GoNoGo">;
 
 const PALETTE = {
   deep: "#347679",
@@ -18,9 +18,11 @@ const PALETTE = {
   mist: "#d1e1e1",
 };
 
-export default function GameScreen({ navigation }: Props) {
+export default function GameScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
+
+  const level = route.params?.level;
 
   async function waitForLastRun(): Promise<GameRun | null> {
     const tries = 10;
@@ -52,7 +54,7 @@ export default function GameScreen({ navigation }: Props) {
       <View style={styles.blobRight} />
       <View style={styles.blobBottom} />
 
-      <GoNoGoGame onFinished={handleFinished} />
+      <GoNoGoGame onFinished={handleFinished} level={level} />
     </SafeAreaView>
   );
 }

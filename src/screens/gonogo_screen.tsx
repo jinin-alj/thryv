@@ -4,7 +4,7 @@ import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import ProgressBar from "../ui/progressbar";
 import { createRun, finishRun } from "../game/gonogo/engine";
-import { difficultyForLevel } from "../game/gonogo/difficulty";
+import { difficultyForLevel, getGoNoGoMode } from "../game/gonogo/difficulty";
 import { Stimulus, RunStats } from "../game/gonogo/types";
 import { getJSON, setJSON, Keys, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +13,7 @@ function uid() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
-const MAX_LEVEL = 3;
+const MAX_LEVEL = 4;
 const RUNS_PER_LEVEL = 3;
 
 const PALETTE = {
@@ -26,8 +26,10 @@ const PALETTE = {
 
 export default function GoNoGoGame({
   onFinished,
+  level: forcedLevel,
 }: {
   onFinished: () => void;
+  level?: 1 | 2 | 3 | 4;
 }) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
@@ -44,21 +46,29 @@ export default function GoNoGoGame({
     (async () => {
       const runs = await getJSON<GameRun[]>(Keys.runs, []);
       setTotalRuns(runs.length);
-      setLevel(Math.min(MAX_LEVEL, 1 + Math.floor(runs.length / RUNS_PER_LEVEL)));
+
+      // If a level is provided (MVP difficulty selection), use it.
+      // Otherwise fall back to progressive unlocks.
+      const unlocked = Math.min(
+        MAX_LEVEL,
+        1 + Math.floor(runs.length / RUNS_PER_LEVEL)
+      );
+      setLevel(forcedLevel ?? unlocked);
     })();
-  }, []);
+  }, [forcedLevel]);
 
   const runsIntoLevel = totalRuns % RUNS_PER_LEVEL;
-  const runsRemaining =
-    level < MAX_LEVEL ? RUNS_PER_LEVEL - runsIntoLevel : 0;
+  const runsRemaining = level < MAX_LEVEL ? RUNS_PER_LEVEL - runsIntoLevel : 0;
 
-  const xpProgress =
-    level === MAX_LEVEL ? 1 : runsIntoLevel / RUNS_PER_LEVEL;
+  const xpProgress = level === MAX_LEVEL ? 1 : runsIntoLevel / RUNS_PER_LEVEL;
 
-  const diff = useMemo(() => difficultyForLevel(level), [level]);
+  const speedLevel = level === 1 ? 1 : level === 2 ? 2 : 3;
+
+  const diff = useMemo(() => difficultyForLevel(speedLevel), [speedLevel]);
+  const mode = useMemo(() => getGoNoGoMode(level), [level]);
 
   const [stimuli, setStimuli] = useState<Stimulus[]>(() =>
-    createRun({ totalTrials, difficulty: diff })
+    createRun({ totalTrials, difficulty: diff, mode })
   );
 
   const [index, setIndex] = useState(0);
@@ -71,6 +81,12 @@ export default function GoNoGoGame({
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
   }
+
+  useEffect(() => {
+    setStimuli(createRun({ totalTrials, difficulty: diff, mode }));
+    setIndex(0);
+    setPhase("SHOW");
+  }, [diff, mode]);
 
   useEffect(() => {
     clearTimer();
@@ -170,7 +186,7 @@ export default function GoNoGoGame({
       1 + Math.floor(newRuns.length / RUNS_PER_LEVEL)
     );
 
-    if (newLevel > level) {
+    if (!forcedLevel && newLevel > level) {
       await playLevelUpAnimation();
     }
 
@@ -200,8 +216,33 @@ export default function GoNoGoGame({
   }
 
   const progress = index / totalTrials;
-  const kind = nowStimulus?.kind;
-  const isGo = kind === "GO";
+
+  const instruction =
+    mode.rule === "identity"
+      ? "Tap when it says GO"
+      : mode.rule === "color"
+      ? "Tap only when the letters are BLUE"
+      : mode.rule === "shape"
+      ? "Tap only when it’s a CIRCLE"
+      : "Tap only when it’s a BLUE CIRCLE";
+
+  const textColor =
+    nowStimulus?.color === "blue"
+      ? PALETTE.deep
+      : nowStimulus?.color === "gray"
+      ? "rgba(10,10,10,0.85)"
+      : theme.text;
+
+  const shapeFill = mode.rule === "dual" ? textColor : theme.text;
+
+  const label =
+    level === 1
+      ? "Beginner"
+      : level === 2
+      ? "Intermediate"
+      : level === 3
+      ? "Advanced"
+      : "Expert";
 
   return (
     <SafeAreaView style={styles.wrap}>
@@ -210,7 +251,9 @@ export default function GoNoGoGame({
       <View style={styles.blobBottom} />
 
       <Text style={styles.h}>Go / No-Go</Text>
-      <Text style={styles.level}>Level {level}</Text>
+      <Text style={styles.level}>
+        {label} · Level {level}
+      </Text>
 
       <View style={styles.card}>
         <Text style={styles.xpLabel}>XP Progress</Text>
@@ -242,20 +285,32 @@ export default function GoNoGoGame({
 
       <View style={styles.center}>
         <Pressable onPress={tap} style={styles.pad}>
-          <View
-            style={[
-              styles.stimulus,
-              kind === "GO" && { backgroundColor: theme.primary },
-              kind === "NOGO" && { backgroundColor: theme.danger },
-            ]}
-          >
-            <Text style={styles.stxt}>
-              {kind ? (isGo ? "GO" : "NO") : ""}
-            </Text>
+          <View style={styles.stimulus}>
+            {phase === "SHOW" && nowStimulus ? (
+              mode.rule === "shape" || mode.rule === "dual" ? (
+                nowStimulus.shape === "circle" ? (
+                  <View style={[styles.shapeCircle, { backgroundColor: shapeFill }]} />
+                ) : nowStimulus.shape === "square" ? (
+                  <View style={[styles.shapeSquare, { backgroundColor: shapeFill }]} />
+                ) : (
+                  <View style={[styles.shapeTriangle, { borderBottomColor: shapeFill }]} />
+                )
+              ) : (
+                <Text
+                  style={[
+                    styles.stxt,
+                    { color: mode.rule === "color" ? textColor : theme.text },
+                  ]}
+                >
+                  {nowStimulus.symbol ?? ""}
+                </Text>
+              )
+            ) : (
+              <Text style={styles.stxt}>{""}</Text>
+            )}
           </View>
-          <Text style={styles.hint}>
-            {kind ? (isGo ? "TAP" : "DON’T TAP") : ""}
-          </Text>
+
+          <Text style={styles.hint}>{instruction}</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -385,5 +440,28 @@ const makeStyles = (theme: any) =>
       color: theme.text,
       fontWeight: "900",
       opacity: 0.9,
+    },
+
+    shapeCircle: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+    },
+
+    shapeSquare: {
+      width: 92,
+      height: 92,
+      borderRadius: 14,
+    },
+
+    shapeTriangle: {
+      width: 0,
+      height: 0,
+      borderLeftWidth: 56,
+      borderRightWidth: 56,
+      borderBottomWidth: 96,
+      borderLeftColor: "transparent",
+      borderRightColor: "transparent",
+      borderBottomColor: theme.text,
     },
   });

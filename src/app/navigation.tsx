@@ -5,6 +5,7 @@ import StartScreen from "../screens/startscreen";
 import HomeScreen from "../screens/homescreen";
 import GameScreen from "../screens/gamescreen";
 import GamesLandingScreen from "../screens/gameslandingscreen";
+import GoNoGoDifficultyScreen from "../screens/gonogo_difficultyscreen";
 import FocusTimerScreen from "../screens/focustimerscreen";
 import FunFactsScreen from "../screens/funfactscreen";
 import ProfileScreen from "../screens/profilescreen";
@@ -17,7 +18,10 @@ export type RootStackParamList = {
   Start: undefined;
   Home: undefined;
   Games: undefined;
-  GoNoGo: undefined;
+
+  GoNoGoDifficulty: undefined;
+  GoNoGo: { level: 1 | 2 | 3 | 4 } | undefined;
+
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
@@ -36,7 +40,10 @@ export default function RootNavigator() {
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Games" component={GamesLandingScreen} />
+
+      <Stack.Screen name="GoNoGoDifficulty" component={GoNoGoDifficultyScreen} />
       <Stack.Screen name="GoNoGo" component={GameScreen} />
+
       <Stack.Screen name="FocusTimer" component={FocusTimerScreen} />
       <Stack.Screen name="FunFacts" component={FunFactsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />

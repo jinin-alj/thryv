@@ -40,7 +40,7 @@ export default function GamesLandingScreen({ navigation }: Props) {
           onPress: () => {
             // This should navigate to the existing Go/No-Go start screen/flow.
             // If your route name differs, we’ll adjust it when we edit navigation.tsx.
-            navigation.navigate("GoNoGo");
+            navigation.navigate("GoNoGoDifficulty");
           },
         },
       ],
