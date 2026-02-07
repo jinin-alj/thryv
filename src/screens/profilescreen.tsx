@@ -17,6 +17,14 @@ import { getJSON, setJSON, Keys, Profile, GameRun } from "../storage/local";
 
 type Metric = "focus" | "accuracy" | "speed";
 
+const PALETTE = {
+  deep: "#347679",
+  mid: "#478387",
+  soft: "#74a3a5",
+  light: "#a3c1c3",
+  mist: "#d1e1e1",
+};
+
 export default function ProfileScreen() {
   const { theme, toggleTheme, mode } = useAppTheme();
   const styles = makeStyles(theme);
@@ -76,6 +84,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.wrap}>
+      <View style={styles.blobTop} />
+      <View style={styles.blobRight} />
+      <View style={styles.blobBottom} />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -304,6 +316,37 @@ const makeStyles = (theme: any) =>
       padding: spacing.xl,
     },
 
+    blobTop: {
+      position: "absolute",
+      top: -180,
+      left: -140,
+      width: 420,
+      height: 420,
+      borderRadius: 210,
+      backgroundColor: PALETTE.mist,
+      opacity: 0.45,
+    },
+    blobRight: {
+      position: "absolute",
+      top: 40,
+      right: -180,
+      width: 380,
+      height: 380,
+      borderRadius: 190,
+      backgroundColor: PALETTE.light,
+      opacity: 0.2,
+    },
+    blobBottom: {
+      position: "absolute",
+      bottom: -220,
+      left: -120,
+      width: 520,
+      height: 520,
+      borderRadius: 260,
+      backgroundColor: PALETTE.soft,
+      opacity: 0.1,
+    },
+
     scrollContent: {
       paddingBottom: spacing.xl,
     },
@@ -315,11 +358,14 @@ const makeStyles = (theme: any) =>
     },
 
     card: {
-      backgroundColor: theme.card,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: theme.border,
+      backgroundColor: "rgba(209, 225, 225, 0.5)",
+      borderRadius: 24,
       padding: spacing.lg,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 22,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 2,
     },
 
     label: {
@@ -345,7 +391,7 @@ const makeStyles = (theme: any) =>
       marginTop: 8,
       paddingVertical: 6,
       borderBottomWidth: 1,
-      borderBottomColor: theme.border,
+      borderBottomColor: "rgba(163, 193, 195, 0.35)",
     },
 
     resultScore: {

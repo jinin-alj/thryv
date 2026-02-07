@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { spacing } from "../theme/spacing";
@@ -10,8 +10,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
 import { saveGameRun } from "../storage/gameRunsRemote";
 
-
 type Props = NativeStackScreenProps<RootStackParamList, "Results">;
+
+const PALETTE = {
+  deep: "#347679",
+  mid: "#478387",
+  soft: "#74a3a5",
+  light: "#a3c1c3",
+  mist: "#d1e1e1",
+};
 
 export default function ResultsScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
@@ -33,6 +40,9 @@ export default function ResultsScreen({ navigation }: Props) {
   if (!run) {
     return (
       <SafeAreaView style={styles.wrap}>
+        <View style={styles.blobTop} />
+        <View style={styles.blobRight} />
+        <View style={styles.blobBottom} />
         <Text style={styles.h}>Loading results…</Text>
       </SafeAreaView>
     );
@@ -40,27 +50,45 @@ export default function ResultsScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.wrap}>
-      <Text style={styles.h}>Your Results</Text>
+      <View style={styles.blobTop} />
+      <View style={styles.blobRight} />
+      <View style={styles.blobBottom} />
 
-      <View style={{ height: spacing.lg }} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.h}>Your Results</Text>
 
-      <Text style={styles.score}>{run.focusScore}/100</Text>
-      <Text style={styles.stat}>
-        Accuracy: {Math.round(run.accuracy * 100)}%
-      </Text>
-      <Text style={styles.stat}>
-        Avg Reaction: {run.avgReactionMs ?? "-"} ms
-      </Text>
-      <Text style={styles.stat}>
-        Difficulty: Level {run.difficultyLevel}
-      </Text>
+        <View style={{ height: spacing.lg }} />
 
-      <View style={{ flex: 1 }} />
+        <View style={styles.card}>
+          <Text style={styles.score}>{run.focusScore}/100</Text>
 
-      <PrimaryButton
-        title="Back to Home"
-        onPress={() => navigation.replace("Home")}
-      />
+          <View style={{ height: spacing.md }} />
+
+          <Text style={styles.stat}>
+            Accuracy: {Math.round(run.accuracy * 100)}%
+          </Text>
+          <Text style={styles.stat}>
+            Avg Reaction: {run.avgReactionMs ?? "-"} ms
+          </Text>
+          <Text style={styles.stat}>
+            Difficulty: Level {run.difficultyLevel}
+          </Text>
+        </View>
+
+        <View style={{ flex: 1 }} />
+
+        <PrimaryButton
+          title="Back to Home"
+          onPress={() => navigation.replace("Home")}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
+
+        <View style={{ height: spacing.lg }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -70,22 +98,82 @@ const makeStyles = (theme: any) =>
     wrap: {
       flex: 1,
       backgroundColor: theme.background,
+    },
+
+    content: {
+      flexGrow: 1,
       padding: spacing.xl,
     },
+
+    blobTop: {
+      position: "absolute",
+      top: -180,
+      left: -140,
+      width: 420,
+      height: 420,
+      borderRadius: 210,
+      backgroundColor: PALETTE.mist,
+      opacity: 0.45,
+    },
+    blobRight: {
+      position: "absolute",
+      top: 40,
+      right: -180,
+      width: 380,
+      height: 380,
+      borderRadius: 190,
+      backgroundColor: PALETTE.light,
+      opacity: 0.2,
+    },
+    blobBottom: {
+      position: "absolute",
+      bottom: -220,
+      left: -120,
+      width: 520,
+      height: 520,
+      borderRadius: 260,
+      backgroundColor: PALETTE.soft,
+      opacity: 0.1,
+    },
+
     h: {
       color: theme.text,
       fontSize: 28,
       fontWeight: "900",
+      padding: spacing.xl,
     },
+
+    card: {
+      backgroundColor: "rgba(209, 225, 225, 0.5)",
+      borderRadius: 24,
+      padding: spacing.lg,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 22,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 2,
+    },
+
     score: {
       color: theme.primary,
-      fontSize: 48,
+      fontSize: 52,
       fontWeight: "900",
     },
+
     stat: {
       color: theme.text,
       fontSize: 16,
       marginTop: 8,
       fontWeight: "700",
+      opacity: 0.9,
+    },
+
+    primaryBtn: {
+      backgroundColor: "rgba(163, 193, 195, 0.45)",
+    },
+
+    primaryBtnText: {
+      color: PALETTE.deep,
+      fontWeight: "800",
     },
   });

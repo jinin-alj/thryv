@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from "react-native";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
@@ -19,7 +20,7 @@ export default function PrimaryButton({
   title: string;
   onPress: () => void;
   disabled?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   variant?: "outline";
 }) {

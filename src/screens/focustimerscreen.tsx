@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { useAppTheme } from "../theme/themeContext";
@@ -9,6 +9,14 @@ import ProgressBar from "../ui/progressbar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FocusTimer">;
+
+const PALETTE = {
+  deep: "#347679",
+  mid: "#478387",
+  soft: "#74a3a5",
+  light: "#a3c1c3",
+  mist: "#d1e1e1",
+};
 
 function fmt(sec: number) {
   const m = Math.floor(sec / 60);
@@ -71,70 +79,88 @@ export default function FocusTimerScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.wrap}>
-      <Text style={styles.h}>Focus Timer</Text>
-      <Text style={styles.sub}>
-        {mode === "FOCUS" ? "Focus block" : "Break"}
-      </Text>
+      <View style={styles.blobTop} />
+      <View style={styles.blobRight} />
+      <View style={styles.blobBottom} />
 
-      <View style={{ height: spacing.lg }} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.h}>Focus Timer</Text>
+        <Text style={styles.sub}>
+          {mode === "FOCUS" ? "Focus block" : "Break"}
+        </Text>
 
-      <Text style={styles.time}>{fmt(remaining)}</Text>
+        <View style={{ height: spacing.lg }} />
 
-      <View style={{ height: spacing.md }} />
-      <ProgressBar value={progress} />
-
-      <View style={{ height: spacing.lg }} />
-
-      {mode === "FOCUS" && (
-        <>
-          <View style={{ flexDirection: "row", gap: spacing.sm }}>
-            <PrimaryButton
-              title="25m"
-              onPress={() => setFocusMinutes(25)}
-              style={{ flex: 1 }}
-            />
-            <PrimaryButton
-              title="50m"
-              onPress={() => setFocusMinutes(50)}
-              style={{ flex: 1 }}
-            />
-          </View>
+        <View style={styles.card}>
+          <Text style={styles.time}>{fmt(remaining)}</Text>
 
           <View style={{ height: spacing.md }} />
-        </>
-      )}
+          <ProgressBar value={progress} />
+        </View>
 
-      <PrimaryButton
-        title={running ? "Pause" : "Start"}
-        onPress={() => setRunning((r) => !r)}
-      />
+        <View style={{ height: spacing.lg }} />
 
-      <View style={{ height: spacing.sm }} />
+        {mode === "FOCUS" && (
+          <>
+            <View style={{ flexDirection: "row", gap: spacing.sm }}>
+              <PrimaryButton
+                title="25m"
+                onPress={() => setFocusMinutes(25)}
+                style={[styles.pillBtn, { flex: 1 }]}
+                textStyle={styles.pillBtnText}
+              />
+              <PrimaryButton
+                title="50m"
+                onPress={() => setFocusMinutes(50)}
+                style={[styles.pillBtn, { flex: 1 }]}
+                textStyle={styles.pillBtnText}
+              />
+            </View>
 
-      <PrimaryButton
-        title="Reset"
-        onPress={() => {
-          setRunning(false);
-          setRemaining(mode === "FOCUS" ? duration : 5 * 60);
-        }}
-        style={{ backgroundColor: theme.card }}
-      />
+            <View style={{ height: spacing.md }} />
+          </>
+        )}
 
-      <View style={{ flex: 1 }} />
+        <PrimaryButton
+          title={running ? "Pause" : "Start"}
+          onPress={() => setRunning((r) => !r)}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
 
-      {mode === "BREAK" && (
-        <>
-          <PrimaryButton
-            title="Play 2-min Sprint"
-            onPress={() => navigation.replace("Games")}
-          />
-          <View style={{ height: spacing.sm }} />
-        </>
-      )}
+        <View style={{ height: spacing.sm }} />
 
-      <Text style={styles.footer}>
-        Tip: During breaks, play a 2-minute sprint instead of scrolling.
-      </Text>
+        <PrimaryButton
+          title="Reset"
+          onPress={() => {
+            setRunning(false);
+            setRemaining(mode === "FOCUS" ? duration : 5 * 60);
+          }}
+          style={styles.secondaryBtn}
+          textStyle={styles.secondaryBtnText}
+        />
+
+        <View style={{ flex: 1 }} />
+
+        {mode === "BREAK" && (
+          <>
+            <PrimaryButton
+              title="Play 2-min Sprint"
+              onPress={() => navigation.replace("Games")}
+              style={styles.primaryBtn}
+              textStyle={styles.primaryBtnText}
+            />
+            <View style={{ height: spacing.sm }} />
+          </>
+        )}
+
+        <Text style={styles.footer}>
+          Tip: During breaks, play a 2-minute sprint instead of scrolling.
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -144,28 +170,106 @@ const makeStyles = (theme: any) =>
     wrap: {
       flex: 1,
       backgroundColor: theme.background,
+    },
+
+    content: {
+      flexGrow: 1,
       padding: spacing.xl,
     },
+
+    blobTop: {
+      position: "absolute",
+      top: -180,
+      left: -140,
+      width: 420,
+      height: 420,
+      borderRadius: 210,
+      backgroundColor: PALETTE.mist,
+      opacity: 0.45,
+    },
+    blobRight: {
+      position: "absolute",
+      top: 40,
+      right: -180,
+      width: 380,
+      height: 380,
+      borderRadius: 190,
+      backgroundColor: PALETTE.light,
+      opacity: 0.2,
+    },
+    blobBottom: {
+      position: "absolute",
+      bottom: -220,
+      left: -120,
+      width: 520,
+      height: 520,
+      borderRadius: 260,
+      backgroundColor: PALETTE.soft,
+      opacity: 0.1,
+    },
+
     h: {
       color: theme.text,
       fontSize: 28,
       fontWeight: "900",
     },
+
     sub: {
       color: theme.muted,
       marginTop: 6,
       fontWeight: "700",
     },
+
+    card: {
+      backgroundColor: "rgba(209, 225, 225, 0.5)",
+      borderRadius: 24,
+      padding: spacing.lg,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 22,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 2,
+    },
+
     time: {
       color: theme.text,
       fontSize: 54,
       fontWeight: "900",
-      marginTop: spacing.lg,
+      marginTop: spacing.sm,
     },
+
+    pillBtn: {
+      backgroundColor: "rgba(209, 225, 225, 0.65)",
+    },
+
+    pillBtnText: {
+      color: PALETTE.deep,
+      fontWeight: "800",
+    },
+
+    primaryBtn: {
+      backgroundColor: "rgba(163, 193, 195, 0.45)",
+    },
+
+    primaryBtnText: {
+      color: PALETTE.deep,
+      fontWeight: "800",
+    },
+
+    secondaryBtn: {
+      backgroundColor: "rgba(209, 225, 225, 0.6)",
+    },
+
+    secondaryBtnText: {
+      color: PALETTE.deep,
+      fontWeight: "700",
+    },
+
     footer: {
       color: theme.muted,
       fontSize: 12,
       fontWeight: "700",
       opacity: 0.85,
+      marginTop: spacing.md,
     },
   });

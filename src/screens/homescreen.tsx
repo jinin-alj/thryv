@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { useAppTheme } from "../theme/themeContext";
@@ -13,6 +13,14 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system/legacy";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
+
+const PALETTE = {
+  deep: "#347679",
+  mid: "#478387",
+  soft: "#74a3a5",
+  light: "#a3c1c3",
+  mist: "#d1e1e1",
+};
 
 export default function HomeScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
@@ -79,67 +87,79 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={[styles.wrap, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
-      <Text style={[styles.sub, { color: theme.muted }]}>
-        Prime your brain. Then crush the study block.
-      </Text>
+      <View style={styles.blobTop} />
+      <View style={styles.blobRight} />
+      <View style={styles.blobBottom} />
 
-      <View style={{ height: spacing.lg }} />
-
-      <View
-        style={[
-          styles.brainCard,
-          { backgroundColor: theme.card, borderColor: theme.border },
-        ]}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        {brainHtml ? (
-          <WebView
-            originWhitelist={["*"]}
-            source={{ html: brainHtml }}
-            style={{ flex: 1, backgroundColor: "transparent" }}
-            javaScriptEnabled
-            domStorageEnabled
-            scrollEnabled={false}
-            allowsInlineMediaPlayback
-          />
-        ) : (
-          <View style={styles.brainFallback}>
-            <Text style={{ color: theme.muted, fontWeight: "600" }}>
-              Loading brain…
-            </Text>
-          </View>
-        )}
-      </View>
+        <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
+        <Text style={[styles.sub, { color: theme.muted }]}>
+          Prime your brain. Then crush the study block.
+        </Text>
 
-      <View style={{ height: spacing.lg }} />
+        <View style={{ height: spacing.lg }} />
 
-      <PrimaryButton title="Play" onPress={() => navigation.navigate("Games")} />
+        <View style={styles.brainCard}>
+          {brainHtml ? (
+            <WebView
+              originWhitelist={["*"]}
+              source={{ html: brainHtml }}
+              style={{ flex: 1, backgroundColor: "transparent" }}
+              javaScriptEnabled
+              domStorageEnabled
+              scrollEnabled={false}
+              allowsInlineMediaPlayback
+            />
+          ) : (
+            <View style={styles.brainFallback}>
+              <Text style={{ color: theme.muted, fontWeight: "600" }}>
+                Loading brain…
+              </Text>
+            </View>
+          )}
+        </View>
 
-      <View style={{ height: spacing.sm }} />
+        <View style={{ height: spacing.lg }} />
 
-      <PrimaryButton
-        title="Focus Timer"
-        onPress={() => navigation.navigate("FocusTimer")}
-        style={{ backgroundColor: theme.card }}
-      />
+        <PrimaryButton
+          title="Play"
+          onPress={() => navigation.navigate("Games")}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
 
-      <View style={{ height: spacing.sm }} />
+        <View style={{ height: spacing.sm }} />
 
-      <PrimaryButton
-        title="Profile"
-        onPress={() => navigation.navigate("Profile")}
-        style={{ backgroundColor: theme.card }}
-      />
+        <PrimaryButton
+          title="Focus Timer"
+          onPress={() => navigation.navigate("FocusTimer")}
+          style={styles.secondaryBtn}
+          textStyle={styles.secondaryBtnText}
+        />
 
-      <View style={{ height: spacing.sm }} />
+        <View style={{ height: spacing.sm }} />
 
-      <PrimaryButton
-        title="Fun Facts"
-        onPress={() => navigation.navigate("FunFacts")}
-        style={{ backgroundColor: theme.card }}
-      />
+        <PrimaryButton
+          title="Profile"
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.secondaryBtn}
+          textStyle={styles.secondaryBtnText}
+        />
 
-      <View style={{ flex: 1 }} />
+        <View style={{ height: spacing.sm }} />
+
+        <PrimaryButton
+          title="Fun Facts"
+          onPress={() => navigation.navigate("FunFacts")}
+          style={styles.secondaryBtn}
+          textStyle={styles.secondaryBtnText}
+        />
+
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -147,8 +167,44 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
+  },
+
+  content: {
+    flexGrow: 1,
     padding: spacing.xl,
   },
+
+  blobTop: {
+    position: "absolute",
+    top: -180,
+    left: -140,
+    width: 420,
+    height: 420,
+    borderRadius: 210,
+    backgroundColor: PALETTE.mist,
+    opacity: 0.45,
+  },
+  blobRight: {
+    position: "absolute",
+    top: 40,
+    right: -180,
+    width: 380,
+    height: 380,
+    borderRadius: 190,
+    backgroundColor: PALETTE.light,
+    opacity: 0.2,
+  },
+  blobBottom: {
+    position: "absolute",
+    bottom: -220,
+    left: -120,
+    width: 520,
+    height: 520,
+    borderRadius: 260,
+    backgroundColor: PALETTE.soft,
+    opacity: 0.1,
+  },
+
   title: {
     fontSize: 28,
     fontWeight: "900",
@@ -160,13 +216,34 @@ const styles = StyleSheet.create({
 
   brainCard: {
     height: 220,
-    borderRadius: 18,
+    borderRadius: 24,
     overflow: "hidden",
-    borderWidth: 1,
+    backgroundColor: "rgba(209, 225, 225, 0.5)",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 2,
   },
   brainFallback: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  primaryBtn: {
+    backgroundColor: "rgba(163, 193, 195, 0.45)",
+  },
+  primaryBtnText: {
+    color: PALETTE.deep,
+    fontWeight: "800",
+  },
+
+  secondaryBtn: {
+    backgroundColor: "rgba(209, 225, 225, 0.6)",
+  },
+  secondaryBtnText: {
+    color: PALETTE.deep,
+    fontWeight: "700",
   },
 });

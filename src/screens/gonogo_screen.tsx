@@ -16,6 +16,14 @@ function uid() {
 const MAX_LEVEL = 3;
 const RUNS_PER_LEVEL = 3;
 
+const PALETTE = {
+  deep: "#347679",
+  mid: "#478387",
+  soft: "#74a3a5",
+  light: "#a3c1c3",
+  mist: "#d1e1e1",
+};
+
 export default function GoNoGoGame({
   onFinished,
 }: {
@@ -106,28 +114,27 @@ export default function GoNoGoGame({
 
   function tap() {
     if (phase !== "SHOW") return;
-  
+
     const reactedAt = Date.now();
     const shownAt = nowStimulus?.shownAt ?? reactedAt;
-  
+
     setStimuli((prev) => {
       const copy = [...prev];
       const s = copy[index];
       if (!s) return prev;
-  
+
       copy[index] = {
         ...s,
         respondedAt: reactedAt,
         reactionMs: reactedAt - shownAt,
         correct: s.kind === "GO",
       };
-  
+
       return copy;
     });
-  
+
     setPhase("ISI");
   }
-  
 
   useEffect(() => {
     if (phase === "DONE") {
@@ -198,17 +205,23 @@ export default function GoNoGoGame({
 
   return (
     <SafeAreaView style={styles.wrap}>
+      <View style={styles.blobTop} />
+      <View style={styles.blobRight} />
+      <View style={styles.blobBottom} />
+
       <Text style={styles.h}>Go / No-Go</Text>
       <Text style={styles.level}>Level {level}</Text>
 
-      <Text style={styles.xpLabel}>XP Progress</Text>
-      <ProgressBar value={xpProgress} />
+      <View style={styles.card}>
+        <Text style={styles.xpLabel}>XP Progress</Text>
+        <ProgressBar value={xpProgress} />
 
-      {level < MAX_LEVEL && (
-        <Text style={styles.xpText}>
-          {runsRemaining} run(s) until next level
-        </Text>
-      )}
+        {level < MAX_LEVEL && (
+          <Text style={styles.xpText}>
+            {runsRemaining} run(s) until next level
+          </Text>
+        )}
+      </View>
 
       {showLevelUp && (
         <Animated.Text
@@ -256,28 +269,77 @@ const makeStyles = (theme: any) =>
       backgroundColor: theme.background,
       padding: spacing.xl,
     },
+
+    blobTop: {
+      position: "absolute",
+      top: -180,
+      left: -140,
+      width: 420,
+      height: 420,
+      borderRadius: 210,
+      backgroundColor: PALETTE.mist,
+      opacity: 0.35,
+    },
+    blobRight: {
+      position: "absolute",
+      top: 40,
+      right: -180,
+      width: 380,
+      height: 380,
+      borderRadius: 190,
+      backgroundColor: PALETTE.light,
+      opacity: 0.18,
+    },
+    blobBottom: {
+      position: "absolute",
+      bottom: -220,
+      left: -120,
+      width: 520,
+      height: 520,
+      borderRadius: 260,
+      backgroundColor: PALETTE.soft,
+      opacity: 0.09,
+    },
+
     h: {
       color: theme.text,
       fontSize: 28,
       fontWeight: "900",
     },
+
     level: {
       color: theme.primary,
       fontWeight: "800",
       marginBottom: 6,
     },
+
+    card: {
+      backgroundColor: "rgba(209, 225, 225, 0.5)",
+      borderRadius: 20,
+      padding: spacing.lg,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 2,
+      marginTop: spacing.sm,
+    },
+
     xpLabel: {
       color: theme.text,
       fontSize: 12,
       fontWeight: "800",
       marginBottom: 4,
     },
+
     xpText: {
       color: theme.text,
       fontSize: 12,
       marginTop: 4,
       fontWeight: "600",
+      opacity: 0.85,
     },
+
     levelUp: {
       position: "absolute",
       top: 120,
@@ -287,31 +349,41 @@ const makeStyles = (theme: any) =>
       fontWeight: "900",
       zIndex: 10,
     },
+
     center: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
     },
+
     pad: {
       alignItems: "center",
       gap: spacing.md,
     },
+
     stimulus: {
       width: 220,
       height: 220,
-      borderRadius: 36,
+      borderRadius: 44,
       alignItems: "center",
       justifyContent: "center",
-      borderWidth: 1,
-      borderColor: theme.border,
+      backgroundColor: "rgba(209, 225, 225, 0.45)",
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 2,
     },
+
     stxt: {
       color: theme.text,
       fontSize: 44,
       fontWeight: "900",
     },
+
     hint: {
       color: theme.text,
       fontWeight: "900",
+      opacity: 0.9,
     },
   });
