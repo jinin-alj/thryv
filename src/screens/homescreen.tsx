@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Pressable,
+} from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { useAppTheme } from "../theme/themeContext";
@@ -26,7 +33,6 @@ export default function HomeScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [lastRun, setLastRun] = useState<GameRun | null>(null);
-
   const [brainHtml, setBrainHtml] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,14 +101,58 @@ export default function HomeScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <Image
+            source={require("../assets/THRYV_icon.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <Pressable
+            onPress={() => navigation.navigate("Profile")}
+            style={styles.profileBtn}
+            hitSlop={10}
+          >
+            <Image
+              source={require("../assets/profile_icon.png")}
+              style={styles.profileIcon}
+              resizeMode="contain"
+            />
+          </Pressable>
+        </View>
+
+        <View style={{ height: spacing.md }} />
+
+        <Text style={[styles.title, { color: theme.text }]}>
+          Welcome back
+        </Text>
         <Text style={[styles.sub, { color: theme.muted }]}>
           Prime your brain. Then crush the study block.
         </Text>
 
+        <View style={{ height: spacing.md }} />
+
+        {/* Today context */}
+        <View style={styles.todayCard}>
+          <Text style={[styles.todayLabel, { color: theme.muted }]}>
+            Today
+          </Text>
+          <Text style={[styles.todayText, { color: theme.text }]}>
+            {lastRun
+              ? "Keep the momentum — one quick round can sharpen your focus."
+              : "No sessions yet. Start with a quick round to warm up your focus."}
+          </Text>
+        </View>
+
         <View style={{ height: spacing.lg }} />
 
+        {/* Brain card */}
         <View style={styles.brainCard}>
+          <View style={styles.brainTag}>
+            <Text style={styles.brainTagText}>Focus warm-up</Text>
+          </View>
+
           {brainHtml ? (
             <WebView
               originWhitelist={["*"]}
@@ -124,6 +174,13 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={{ height: spacing.lg }} />
 
+        {/* Actions */}
+        <Text style={[styles.sectionLabel, { color: theme.muted }]}>
+          Start
+        </Text>
+
+        <View style={{ height: spacing.sm }} />
+
         <PrimaryButton
           title="Play"
           onPress={() => navigation.navigate("Games")}
@@ -131,20 +188,17 @@ export default function HomeScreen({ navigation }: Props) {
           textStyle={styles.primaryBtnText}
         />
 
+        <View style={{ height: spacing.lg }} />
+
+        <Text style={[styles.sectionLabel, { color: theme.muted }]}>
+          Quick actions
+        </Text>
+
         <View style={{ height: spacing.sm }} />
 
         <PrimaryButton
           title="Focus Timer"
           onPress={() => navigation.navigate("FocusTimer")}
-          style={styles.secondaryBtn}
-          textStyle={styles.secondaryBtnText}
-        />
-
-        <View style={{ height: spacing.sm }} />
-
-        <PrimaryButton
-          title="Profile"
-          onPress={() => navigation.navigate("Profile")}
           style={styles.secondaryBtn}
           textStyle={styles.secondaryBtnText}
         />
@@ -165,9 +219,7 @@ export default function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    flex: 1,
-  },
+  wrap: { flex: 1 },
 
   content: {
     flexGrow: 1,
@@ -205,6 +257,32 @@ const styles = StyleSheet.create({
     opacity: 0.1,
   },
 
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  logo: {
+    width: 60,
+    height: 60,
+    opacity: 0.9,
+  },
+
+  profileBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(209, 225, 225, 0.75)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  profileIcon: {
+    width: 20,
+    height: 20,
+  },
+
   title: {
     fontSize: 28,
     fontWeight: "900",
@@ -214,16 +292,50 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  todayCard: {
+    borderRadius: 18,
+    padding: spacing.md,
+    backgroundColor: "rgba(209, 225, 225, 0.45)",
+  },
+  todayLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  todayText: {
+    marginTop: 6,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+
   brainCard: {
-    height: 220,
+    height: 240,
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: "rgba(209, 225, 225, 0.5)",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 2,
+  },
+  brainTag: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    zIndex: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(52, 118, 121, 0.14)",
+  },
+  brainTagText: {
+    color: PALETTE.deep,
+    fontWeight: "900",
+    fontSize: 12,
   },
   brainFallback: {
     flex: 1,
@@ -232,11 +344,14 @@ const styles = StyleSheet.create({
   },
 
   primaryBtn: {
-    backgroundColor: "rgba(163, 193, 195, 0.45)",
+    backgroundColor: "rgba(52, 118, 121, 0.14)",
+    paddingVertical: 18,
+    borderRadius: 22,
   },
   primaryBtnText: {
     color: PALETTE.deep,
-    fontWeight: "800",
+    fontWeight: "900",
+    fontSize: 18,
   },
 
   secondaryBtn: {
