@@ -106,24 +106,28 @@ export default function GoNoGoGame({
 
   function tap() {
     if (phase !== "SHOW") return;
-
+  
+    const reactedAt = Date.now();
+    const shownAt = nowStimulus?.shownAt ?? reactedAt;
+  
     setStimuli((prev) => {
       const copy = [...prev];
       const s = copy[index];
       if (!s) return prev;
-
+  
       copy[index] = {
         ...s,
-        respondedAt: Date.now(),
-        reactionMs: Date.now() - (s.shownAt ?? Date.now()),
+        respondedAt: reactedAt,
+        reactionMs: reactedAt - shownAt,
         correct: s.kind === "GO",
       };
-
+  
       return copy;
     });
-
+  
     setPhase("ISI");
   }
+  
 
   useEffect(() => {
     if (phase === "DONE") {
