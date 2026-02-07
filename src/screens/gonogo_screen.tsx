@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import ProgressBar from "../ui/progressbar";
@@ -107,11 +108,20 @@ export default function GoNoGoGame({
     }
   }, [phase, index]);
 
-  function tap() {
+  async function tap() {
     if (phase !== "SHOW") return;
 
     const reactedAt = Date.now();
     const shownAt = nowStimulus?.shownAt ?? reactedAt;
+
+    const isCorrect = nowStimulus?.kind === "GO";
+
+    // 🔥 Haptic feedback
+    if (isCorrect) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
 
     setStimuli((prev) => {
       const copy = [...prev];
@@ -133,6 +143,7 @@ export default function GoNoGoGame({
 
   useEffect(() => {
     if (phase === "DONE") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const stats = finishRun(stimuli);
       persist(stats);
     }
@@ -180,10 +191,6 @@ export default function GoNoGoGame({
       block.passed = stats.accuracy > 0.75;
     }
 
-    if (!tierData.unlocked && !tierData.sampleUsed) {
-      tierData.sampleUsed = true;
-    }
-
     await setGoNoGoProgress(progress);
 
     onFinished();
@@ -204,7 +211,6 @@ export default function GoNoGoGame({
     <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Go / No-Go</Text>
 
-      {/* 🔥 Instruction Banner */}
       <View style={styles.banner}>
         <Text style={styles.bannerText}>{ruleText}</Text>
       </View>
