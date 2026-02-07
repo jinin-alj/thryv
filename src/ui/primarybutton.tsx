@@ -1,5 +1,11 @@
 import React from "react";
-import { Pressable, Text, StyleSheet, ViewStyle } from "react-native";
+import {
+  Pressable,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
 
@@ -8,11 +14,13 @@ export default function PrimaryButton({
   onPress,
   disabled,
   style,
+  textStyle,
 }: {
   title: string;
   onPress: () => void;
   disabled?: boolean;
   style?: ViewStyle;
+  textStyle?: TextStyle;
   variant?: "outline";
 }) {
   const { theme } = useAppTheme();
@@ -29,7 +37,7 @@ export default function PrimaryButton({
         style,
       ]}
     >
-      <Text style={styles.txt}>{title}</Text>
+      <Text style={[styles.txt, textStyle]}>{title}</Text>
     </Pressable>
   );
 }
@@ -44,5 +52,9 @@ const makeStyles = (theme: any) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    txt: { color: theme.text, fontSize: 16, fontWeight: "800" },
+    txt: {
+      color: theme.text,
+      fontSize: 16,
+      fontWeight: "800",
+    },
   });
