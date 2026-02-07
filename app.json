@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "thryv",
+    "slug": "thryv",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "thryv",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "plugins": ["expo-asset"]
+  }
+}
