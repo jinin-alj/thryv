@@ -184,23 +184,6 @@ export default function GoNoGoGame({
       tierData.sampleUsed = true;
     }
 
-    const passedCount = tierData.blocks.filter((b) => b.passed).length;
-
-    if (passedCount >= 15) {
-      const nextTier =
-        tier === 1
-          ? "intermediate"
-          : tier === 2
-          ? "advanced"
-          : tier === 3
-          ? "expert"
-          : null;
-
-      if (nextTier) {
-        progress[nextTier].unlocked = true;
-      }
-    }
-
     await setGoNoGoProgress(progress);
 
     onFinished();
@@ -220,7 +203,11 @@ export default function GoNoGoGame({
   return (
     <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Go / No-Go</Text>
-      <Text style={styles.rule}>{ruleText}</Text>
+
+      {/* 🔥 Instruction Banner */}
+      <View style={styles.banner}>
+        <Text style={styles.bannerText}>{ruleText}</Text>
+      </View>
 
       <ProgressBar value={progressPercent} />
 
@@ -275,11 +262,19 @@ const makeStyles = (theme: any) =>
       fontSize: 28,
       fontWeight: "900",
     },
-    rule: {
+    banner: {
+      backgroundColor: "rgba(209, 225, 225, 0.6)",
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      marginTop: spacing.sm,
+      marginBottom: spacing.md,
+      alignSelf: "flex-start",
+    },
+    bannerText: {
       color: theme.text,
       fontWeight: "800",
-      marginBottom: spacing.md,
-      opacity: 0.85,
+      fontSize: 14,
     },
     center: {
       flex: 1,
