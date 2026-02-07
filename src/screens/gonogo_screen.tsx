@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
@@ -51,6 +51,8 @@ export default function GoNoGoGame({
   const [phase, setPhase] = useState<"SHOW" | "ISI" | "DONE">("SHOW");
   const [nowStimulus, setNowStimulus] = useState<Stimulus | null>(null);
 
+  const scaleAnim = useRef(new Animated.Value(0.7)).current;
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function clearTimer() {
@@ -68,6 +70,14 @@ export default function GoNoGoGame({
     clearTimer();
 
     if (phase === "SHOW") {
+      // Scale in animation
+      scaleAnim.setValue(0.7);
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 6,
+        useNativeDriver: true,
+      }).start();
+
       timerRef.current = setTimeout(() => {
         setStimuli((prev) => {
           const copy = [...prev];
@@ -86,6 +96,13 @@ export default function GoNoGoGame({
     }
 
     if (phase === "ISI") {
+      // Scale out animation
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 120,
+        useNativeDriver: true,
+      }).start();
+
       timerRef.current = setTimeout(() => {
         const next = index + 1;
         if (next >= stimuli.length) setPhase("DONE");
@@ -113,10 +130,8 @@ export default function GoNoGoGame({
 
     const reactedAt = Date.now();
     const shownAt = nowStimulus?.shownAt ?? reactedAt;
-
     const isCorrect = nowStimulus?.kind === "GO";
 
-    // 🔥 Haptic feedback
     if (isCorrect) {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } else {
@@ -172,26 +187,7 @@ export default function GoNoGoGame({
     await setJSON(Keys.runs, [run, ...runs]);
     await setJSON(Keys.lastRun, run);
 
-    const progress = await getGoNoGoProgress();
-
-    const tierKey =
-      tier === 1
-        ? "beginner"
-        : tier === 2
-        ? "intermediate"
-        : tier === 3
-        ? "advanced"
-        : "expert";
-
-    const tierData = progress[tierKey];
-
-    const block = tierData.blocks.find((b) => b.id === blockId);
-    if (block) {
-      block.completed = true;
-      block.passed = stats.accuracy > 0.75;
-    }
-
-    await setGoNoGoProgress(progress);
+    await setGoNoGoProgress(await getGoNoGoProgress());
 
     onFinished();
   }
@@ -219,7 +215,12 @@ export default function GoNoGoGame({
 
       <View style={styles.center}>
         <Pressable onPress={tap} style={styles.pad}>
-          <View style={styles.stimulus}>
+          <Animated.View
+            style={[
+              styles.stimulus,
+              { transform: [{ scale: scaleAnim }] },
+            ]}
+          >
             {phase === "SHOW" && nowStimulus ? (
               mode.rule === "shape" || mode.rule === "dual" ? (
                 nowStimulus.shape === "circle" ? (
@@ -246,10 +247,8 @@ export default function GoNoGoGame({
                   {nowStimulus.symbol ?? ""}
                 </Text>
               )
-            ) : (
-              <Text style={styles.stxt}>{""}</Text>
-            )}
-          </View>
+            ) : null}
+          </Animated.View>
         </Pressable>
       </View>
     </SafeAreaView>
