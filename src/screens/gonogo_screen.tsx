@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import ProgressBar from "../ui/progressbar";
@@ -107,11 +108,20 @@ export default function GoNoGoGame({
     }
   }, [phase, index]);
 
-  function tap() {
+  async function tap() {
     if (phase !== "SHOW") return;
 
     const reactedAt = Date.now();
     const shownAt = nowStimulus?.shownAt ?? reactedAt;
+
+    const isCorrect = nowStimulus?.kind === "GO";
+
+    // 🔥 Haptic feedback
+    if (isCorrect) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
 
     setStimuli((prev) => {
       const copy = [...prev];
@@ -133,6 +143,7 @@ export default function GoNoGoGame({
 
   useEffect(() => {
     if (phase === "DONE") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const stats = finishRun(stimuli);
       persist(stats);
     }
@@ -180,27 +191,6 @@ export default function GoNoGoGame({
       block.passed = stats.accuracy > 0.75;
     }
 
-    if (!tierData.unlocked && !tierData.sampleUsed) {
-      tierData.sampleUsed = true;
-    }
-
-    const passedCount = tierData.blocks.filter((b) => b.passed).length;
-
-    if (passedCount >= 15) {
-      const nextTier =
-        tier === 1
-          ? "intermediate"
-          : tier === 2
-          ? "advanced"
-          : tier === 3
-          ? "expert"
-          : null;
-
-      if (nextTier) {
-        progress[nextTier].unlocked = true;
-      }
-    }
-
     await setGoNoGoProgress(progress);
 
     onFinished();
@@ -220,7 +210,10 @@ export default function GoNoGoGame({
   return (
     <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>Go / No-Go</Text>
-      <Text style={styles.rule}>{ruleText}</Text>
+
+      <View style={styles.banner}>
+        <Text style={styles.bannerText}>{ruleText}</Text>
+      </View>
 
       <ProgressBar value={progressPercent} />
 
@@ -275,11 +268,19 @@ const makeStyles = (theme: any) =>
       fontSize: 28,
       fontWeight: "900",
     },
-    rule: {
+    banner: {
+      backgroundColor: "rgba(209, 225, 225, 0.6)",
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      marginTop: spacing.sm,
+      marginBottom: spacing.md,
+      alignSelf: "flex-start",
+    },
+    bannerText: {
       color: theme.text,
       fontWeight: "800",
-      marginBottom: spacing.md,
-      opacity: 0.85,
+      fontSize: 14,
     },
     center: {
       flex: 1,
