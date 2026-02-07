@@ -1,8 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAuth } from "firebase/auth";
+
+function withUserScope(key: string): string {
+  const auth = getAuth();
+  const uid = auth.currentUser?.uid;
+  if (!uid) return key;
+  return `${key}:${uid}`;
+}
 
 export async function getJSON<T>(key: string, fallback: T): Promise<T> {
   try {
-    const raw = await AsyncStorage.getItem(key);
+    const scopedKey = withUserScope(key);
+    const raw = await AsyncStorage.getItem(scopedKey);
     if (!raw) return fallback;
     return JSON.parse(raw) as T;
   } catch {
@@ -11,20 +20,24 @@ export async function getJSON<T>(key: string, fallback: T): Promise<T> {
 }
 
 export async function setJSON<T>(key: string, value: T): Promise<void> {
-  await AsyncStorage.setItem(key, JSON.stringify(value));
+  const scopedKey = withUserScope(key);
+  await AsyncStorage.setItem(scopedKey, JSON.stringify(value));
 }
 
 export async function getString(key: string, fallback = ""): Promise<string> {
-  const v = await AsyncStorage.getItem(key);
+  const scopedKey = withUserScope(key);
+  const v = await AsyncStorage.getItem(scopedKey);
   return v ?? fallback;
 }
 
 export async function setString(key: string, value: string): Promise<void> {
-  await AsyncStorage.setItem(key, value);
+  const scopedKey = withUserScope(key);
+  await AsyncStorage.setItem(scopedKey, value);
 }
 
 export async function removeKey(key: string): Promise<void> {
-  await AsyncStorage.removeItem(key);
+  const scopedKey = withUserScope(key);
+  await AsyncStorage.removeItem(scopedKey);
 }
 
 export const Keys = {
@@ -33,6 +46,7 @@ export const Keys = {
   lastRun: "thryv:lastRun",
   runs: "thryv:runs",
   freePlaysDaily: "thryv:freePlaysDaily",
+  gonogoProgress: "thryv:gonogoProgress",
 } as const;
 
 export type Profile = {
@@ -62,6 +76,69 @@ export type GameRun = {
   noGoCorrect: number;
   noGoWrong: number;
 };
+
+export type GoNoGoBlock = {
+  id: number;
+  completed: boolean;
+  passed: boolean;
+};
+
+export type GoNoGoTierProgress = {
+  unlocked: boolean;
+  sampleUsed: boolean;
+  blocks: GoNoGoBlock[];
+};
+
+export type GoNoGoProgress = {
+  beginner: GoNoGoTierProgress;
+  intermediate: GoNoGoTierProgress;
+  advanced: GoNoGoTierProgress;
+  expert: GoNoGoTierProgress;
+};
+
+function createBlocks(): GoNoGoBlock[] {
+  return Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    completed: false,
+    passed: false,
+  }));
+}
+
+export function createInitialGoNoGoProgress(): GoNoGoProgress {
+  return {
+    beginner: {
+      unlocked: true,
+      sampleUsed: false,
+      blocks: createBlocks(),
+    },
+    intermediate: {
+      unlocked: false,
+      sampleUsed: false,
+      blocks: createBlocks(),
+    },
+    advanced: {
+      unlocked: false,
+      sampleUsed: false,
+      blocks: createBlocks(),
+    },
+    expert: {
+      unlocked: false,
+      sampleUsed: false,
+      blocks: createBlocks(),
+    },
+  };
+}
+
+export async function getGoNoGoProgress(): Promise<GoNoGoProgress> {
+  return await getJSON<GoNoGoProgress>(
+    Keys.gonogoProgress,
+    createInitialGoNoGoProgress()
+  );
+}
+
+export async function setGoNoGoProgress(progress: GoNoGoProgress): Promise<void> {
+  await setJSON(Keys.gonogoProgress, progress);
+}
 
 export function todayKey(): string {
   const d = new Date();

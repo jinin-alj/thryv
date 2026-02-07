@@ -16,8 +16,8 @@ export default function GoNoGoDifficultyScreen({ navigation }: any) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
 
-  function go(level: 1 | 2 | 3 | 4) {
-    navigation.navigate("GoNoGo", { level });
+  function go(tier: 1 | 2 | 3 | 4) {
+    navigation.navigate("GoNoGoBlocks", { tier });
   }
 
   return (

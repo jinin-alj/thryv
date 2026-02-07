@@ -22,7 +22,9 @@ export default function GameScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
 
-  const level = route.params?.level;
+  const level = route.params?.level ?? 1;
+  const tier = route.params?.tier ?? 1;
+  const blockId = route.params?.blockId ?? 1;
 
   async function waitForLastRun(): Promise<GameRun | null> {
     const tries = 10;
@@ -31,7 +33,6 @@ export default function GameScreen({ navigation, route }: Props) {
     for (let i = 0; i < tries; i++) {
       const lastRun = await getJSON<GameRun | null>(Keys.lastRun, null);
       if (lastRun) return lastRun;
-
       await new Promise((res) => setTimeout(res, delayMs));
     }
 
@@ -42,9 +43,13 @@ export default function GameScreen({ navigation, route }: Props) {
     const lastRun = await waitForLastRun();
 
     if (lastRun) {
-      navigation.replace("Results", { runId: lastRun.id });
+      navigation.replace("Results", {
+        runId: lastRun.id,
+        tier,
+        blockId,
+      });
     } else {
-      navigation.replace("Home");
+      navigation.replace("GoNoGoBlocks", { tier });
     }
   }
 
@@ -54,7 +59,12 @@ export default function GameScreen({ navigation, route }: Props) {
       <View style={styles.blobRight} />
       <View style={styles.blobBottom} />
 
-      <GoNoGoGame onFinished={handleFinished} level={level} />
+      <GoNoGoGame
+        onFinished={handleFinished}
+        level={level}
+        tier={tier}
+        blockId={blockId}
+      />
     </SafeAreaView>
   );
 }
