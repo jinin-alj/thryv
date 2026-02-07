@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../app/navigation";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
-import { getJSON, Keys, GameRun } from "../storage/local";
+import { getJSON, Keys, GameRun, getGoNoGoProgress } from "../storage/local";
 import PrimaryButton from "../ui/primarybutton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
@@ -20,12 +20,15 @@ const PALETTE = {
   mist: "#d1e1e1",
 };
 
-export default function ResultsScreen({ navigation }: Props) {
+export default function ResultsScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
 
   const [run, setRun] = useState<GameRun | null>(null);
   const { user } = useAuth();
+
+  const tier = route.params?.tier ?? 1;
+  const blockId = route.params?.blockId ?? 1;
 
   useEffect(() => {
     (async () => {
@@ -36,6 +39,39 @@ export default function ResultsScreen({ navigation }: Props) {
       }
     })();
   }, [user]);
+
+  async function handleNextBlock() {
+    const progress = await getGoNoGoProgress();
+
+    const tierKey =
+      tier === 1
+        ? "beginner"
+        : tier === 2
+        ? "intermediate"
+        : tier === 3
+        ? "advanced"
+        : "expert";
+
+    const tierData = progress[tierKey];
+
+    const nextBlock = tierData.blocks.find(
+      (b) => b.id === blockId + 1
+    );
+
+    if (nextBlock) {
+      navigation.replace("GoNoGo", {
+        level: tier,
+        tier,
+        blockId: blockId + 1,
+      });
+    } else {
+      navigation.replace("GoNoGoBlocks", { tier });
+    }
+  }
+
+  function handleBackToBlocks() {
+    navigation.replace("GoNoGoBlocks", { tier });
+  }
 
   if (!run) {
     return (
@@ -79,6 +115,24 @@ export default function ResultsScreen({ navigation }: Props) {
         </View>
 
         <View style={{ flex: 1 }} />
+
+        <PrimaryButton
+          title="Play Next Block"
+          onPress={handleNextBlock}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
+
+        <View style={{ height: spacing.md }} />
+
+        <PrimaryButton
+          title="Back to Blocks"
+          onPress={handleBackToBlocks}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
+
+        <View style={{ height: spacing.md }} />
 
         <PrimaryButton
           title="Back to Home"
