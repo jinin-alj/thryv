@@ -6,7 +6,7 @@ import { spacing } from "../theme/spacing";
 import PrimaryButton from "../ui/primarybutton";
 import { useAuth } from "../auth/AuthContext";
 
-export default function LoginScreen({ navigation }: any) {
+export default function LoginScreen({ navigation, route }: any) {
   const { theme } = useAppTheme();
   const { signIn, user } = useAuth();
 
@@ -15,17 +15,19 @@ export default function LoginScreen({ navigation }: any) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const fromWelcome = route?.params?.fromWelcome === true;
+
   useEffect(() => {
     if (user) {
       navigation.replace("Home");
     }
-  }, [user, navigation]);  
+  }, [user, navigation]);
 
   async function onLogin() {
     setErr(null);
     setBusy(true);
     try {
-        await signIn(email.trim().toLowerCase(), password);
+      await signIn(email.trim().toLowerCase(), password);
     } catch (e: any) {
       setErr(e?.message ?? "Login failed");
     } finally {
@@ -35,7 +37,9 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.wrap, { backgroundColor: theme.background }]} edges={["top", "bottom"]}>
-      <Text style={[styles.title, { color: theme.text }]}>Log in</Text>
+      <Text style={[styles.title, { color: theme.text }]}>
+        {fromWelcome ? "So good to see you back" : "Log in"}
+      </Text>
 
       <TextInput
         value={email}
@@ -63,7 +67,7 @@ export default function LoginScreen({ navigation }: any) {
       <View style={{ height: spacing.sm }} />
       <PrimaryButton
         title="Create account"
-        onPress={() => navigation.navigate("SignUp")}
+        onPress={() => navigation.navigate("Signup")}
         style={{ backgroundColor: theme.card }}
       />
     </SafeAreaView>

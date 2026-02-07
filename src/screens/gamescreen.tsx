@@ -8,15 +8,28 @@ import GoNoGoGame from "./gonogo_screen";
 import { getJSON, Keys, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
 type Props = NativeStackScreenProps<RootStackParamList, "Games">;
 
 export default function GameScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);
 
+  async function waitForLastRun(): Promise<GameRun | null> {
+    const tries = 10;
+    const delayMs = 100;
+
+    for (let i = 0; i < tries; i++) {
+      const lastRun = await getJSON<GameRun | null>(Keys.lastRun, null);
+      if (lastRun) return lastRun;
+
+      await new Promise((res) => setTimeout(res, delayMs));
+    }
+
+    return null;
+  }
+
   async function handleFinished() {
-    const lastRun = await getJSON<GameRun | null>(Keys.lastRun, null);
+    const lastRun = await waitForLastRun();
 
     if (lastRun) {
       navigation.replace("Results", { runId: lastRun.id });

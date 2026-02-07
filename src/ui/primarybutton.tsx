@@ -13,6 +13,7 @@ export default function PrimaryButton({
   onPress: () => void;
   disabled?: boolean;
   style?: ViewStyle;
+  variant?: "outline";
 }) {
   const { theme } = useAppTheme();
   const styles = makeStyles(theme);

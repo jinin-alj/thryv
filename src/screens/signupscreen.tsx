@@ -6,7 +6,7 @@ import { spacing } from "../theme/spacing";
 import PrimaryButton from "../ui/primarybutton";
 import { useAuth } from "../auth/AuthContext";
 
-export default function SignUpScreen({ navigation }: any) {
+export default function SignUpScreen({ navigation, route }: any) {
   const { theme } = useAppTheme();
   const { signUp } = useAuth();
 
@@ -14,6 +14,8 @@ export default function SignUpScreen({ navigation }: any) {
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const fromWelcome = route?.params?.fromWelcome === true;
 
   async function onSignUp() {
     setErr(null);
@@ -29,7 +31,9 @@ export default function SignUpScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.wrap, { backgroundColor: theme.background }]} edges={["top", "bottom"]}>
-      <Text style={[styles.title, { color: theme.text }]}>Create account</Text>
+      <Text style={[styles.title, { color: theme.text }]}>
+        {fromWelcome ? "Welcome — you're going to love this." : "Create account"}
+      </Text>
 
       <TextInput
         value={email}

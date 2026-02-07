@@ -9,7 +9,6 @@ import { Stimulus, RunStats } from "../game/gonogo/types";
 import { getJSON, setJSON, Keys, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
 function uid() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
@@ -152,6 +151,8 @@ export default function GoNoGoGame({
     const runs = await getJSON<GameRun[]>(Keys.runs, []);
     const newRuns = [run, ...runs];
     await setJSON(Keys.runs, newRuns);
+
+    await setJSON(Keys.lastRun, run);
 
     const newLevel = Math.min(
       MAX_LEVEL,

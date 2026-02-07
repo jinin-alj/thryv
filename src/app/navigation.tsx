@@ -19,10 +19,10 @@ export type RootStackParamList = {
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
-  Results: { runId: string };
+  Results: { runId: string } | undefined;
   Onboarding: undefined;
-  Login: undefined;
-  SignUp: undefined;
+  Login: { fromWelcome?: boolean } | undefined;
+  Signup: { fromWelcome?: boolean } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,7 +39,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Results" component={ResultsScreen} />
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Signup" component={SignUpScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
