@@ -99,7 +99,13 @@ export default function ResultsScreen({ navigation, route }: Props) {
         <View style={{ height: spacing.lg }} />
 
         <View style={styles.card}>
-          <Text style={styles.score}>{run.focusScore}/100</Text>
+          <Text style={styles.score}>
+            Focus Score: {run.focusScore}/100
+          </Text>
+
+          <Text style={styles.scoreExplanation}>
+            Score reflects accuracy, speed, and impulse control.
+          </Text>
 
           <View style={{ height: spacing.md }} />
 
@@ -153,12 +159,10 @@ const makeStyles = (theme: any) =>
       flex: 1,
       backgroundColor: theme.background,
     },
-
     content: {
       flexGrow: 1,
       padding: spacing.xl,
     },
-
     blobTop: {
       position: "absolute",
       top: -180,
@@ -189,14 +193,12 @@ const makeStyles = (theme: any) =>
       backgroundColor: PALETTE.soft,
       opacity: 0.1,
     },
-
     h: {
       color: theme.text,
       fontSize: 28,
       fontWeight: "900",
       padding: spacing.xl,
     },
-
     card: {
       backgroundColor: "rgba(209, 225, 225, 0.5)",
       borderRadius: 24,
@@ -207,13 +209,18 @@ const makeStyles = (theme: any) =>
       shadowOffset: { width: 0, height: 12 },
       elevation: 2,
     },
-
     score: {
       color: theme.primary,
-      fontSize: 52,
+      fontSize: 42,
       fontWeight: "900",
     },
-
+    scoreExplanation: {
+      color: theme.text,
+      fontSize: 12,
+      opacity: 0.7,
+      marginTop: 4,
+      fontWeight: "600",
+    },
     stat: {
       color: theme.text,
       fontSize: 16,
@@ -221,11 +228,9 @@ const makeStyles = (theme: any) =>
       fontWeight: "700",
       opacity: 0.9,
     },
-
     primaryBtn: {
       backgroundColor: "rgba(163, 193, 195, 0.45)",
     },
-
     primaryBtnText: {
       color: PALETTE.deep,
       fontWeight: "800",
