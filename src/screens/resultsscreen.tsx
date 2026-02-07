@@ -7,6 +7,8 @@ import { useAppTheme } from "../theme/themeContext";
 import { getJSON, Keys, GameRun } from "../storage/local";
 import PrimaryButton from "../ui/primarybutton";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../auth/AuthContext";
+import { saveGameRun } from "../storage/gameRunsRemote";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "Results">;
@@ -16,13 +18,17 @@ export default function ResultsScreen({ navigation }: Props) {
   const styles = makeStyles(theme);
 
   const [run, setRun] = useState<GameRun | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     (async () => {
       const last = await getJSON<GameRun | null>(Keys.lastRun, null);
       setRun(last);
+      if (last && user) {
+        await saveGameRun(user.uid, last);
+      }
     })();
-  }, []);
+  }, [user]);
 
   if (!run) {
     return (

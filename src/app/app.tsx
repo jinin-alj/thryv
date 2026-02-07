@@ -3,6 +3,8 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, useAppTheme } from "../theme/themeContext";
 import RootNavigator from "./navigation";
+import { AuthProvider } from "../auth/AuthContext";
+
 
 function ThemedNavigation() {
   const { theme } = useAppTheme();
@@ -31,7 +33,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <ThemedNavigation />
+        <AuthProvider>
+          <ThemedNavigation />
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

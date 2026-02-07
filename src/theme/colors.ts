@@ -25,8 +25,8 @@ export const lightTheme: AppTheme = {
 export const darkTheme = {
   background: "#0F1C1D",
   card: "#182B2D",
-  text: "#FFFFFF",       // PURE WHITE
-  muted: "#C7D9DB",      // readable secondary
+  text: "#FFFFFF",       
+  muted: "#C7D9DB",      
   primary: "#74a3a5",
   success: "#34D399",
   danger: "#FB7185",
