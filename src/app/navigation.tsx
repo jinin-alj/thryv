@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import StartScreen from "../screens/startscreen";
 import HomeScreen from "../screens/homescreen";
 import GameScreen from "../screens/gamescreen";
+import GamesLandingScreen from "../screens/gameslandingscreen";
 import FocusTimerScreen from "../screens/focustimerscreen";
 import FunFactsScreen from "../screens/funfactscreen";
 import ProfileScreen from "../screens/profilescreen";
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Start: undefined;
   Home: undefined;
   Games: undefined;
+  GoNoGo: undefined;
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
@@ -33,7 +35,8 @@ export default function RootNavigator() {
       <Stack.Screen name="Start" component={StartScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Games" component={GameScreen} />
+      <Stack.Screen name="Games" component={GamesLandingScreen} />
+      <Stack.Screen name="GoNoGo" component={GameScreen} />
       <Stack.Screen name="FocusTimer" component={FocusTimerScreen} />
       <Stack.Screen name="FunFacts" component={FunFactsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />

@@ -8,6 +8,7 @@ export type AppTheme = {
   danger: string;
   border: string;
   accent: string;
+  mutedText?: string;
 };
 
 export const lightTheme: AppTheme = {

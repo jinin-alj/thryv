@@ -150,7 +150,7 @@ export default function HomeScreen({ navigation }: Props) {
         {/* Brain card */}
         <View style={styles.brainCard}>
           <View style={styles.brainTag}>
-            <Text style={styles.brainTagText}>Focus warm-up</Text>
+            <Text style={styles.brainTagText}>Explore the brain</Text>
           </View>
 
           {brainHtml ? (
@@ -176,13 +176,13 @@ export default function HomeScreen({ navigation }: Props) {
 
         {/* Actions */}
         <Text style={[styles.sectionLabel, { color: theme.muted }]}>
-          Start
+          Play
         </Text>
 
         <View style={{ height: spacing.sm }} />
 
         <PrimaryButton
-          title="Play"
+          title="Games"
           onPress={() => navigation.navigate("Games")}
           style={styles.primaryBtn}
           textStyle={styles.primaryBtnText}
