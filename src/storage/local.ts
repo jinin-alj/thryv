@@ -39,8 +39,8 @@ export type Profile = {
   createdAt: string;
   totalRuns: number;
   streakDays: number;
-  lastActiveDate: string; // YYYY-MM-DD
-  isPremium: boolean; // toggle for demo
+  lastActiveDate: string; 
+  isPremium: boolean; 
 };
 
 export type GameRun = {
@@ -48,10 +48,15 @@ export type GameRun = {
   game: "gonogo";
   startedAt: string;
   endedAt: string;
-  accuracy: number; // 0..1
-  avgReactionMs: number | null; // null if no-go only (rare)
-  focusScore: number; // 0..100
-  difficultyLevel: number; // 1..10
+  accuracy: number; 
+  avgReactionMs: number | null; 
+  focusScore: number; 
+  difficultyLevel: number; 
+
+  level?: 1 | 2 | 3 | 4;
+  speedLevel?: 1 | 2 | 3;
+  modeId?: "classic" | "color" | "shape" | "dual";
+
   goCorrect: number;
   goWrong: number;
   noGoCorrect: number;

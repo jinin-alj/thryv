@@ -36,7 +36,7 @@ export default function GoNoGoGame({
 
   const totalTrials = 20;
 
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState<1 | 2 | 3 | 4>(1);
   const [totalRuns, setTotalRuns] = useState(0);
   const [showLevelUp, setShowLevelUp] = useState(false);
 
@@ -47,13 +47,13 @@ export default function GoNoGoGame({
       const runs = await getJSON<GameRun[]>(Keys.runs, []);
       setTotalRuns(runs.length);
 
-      // If a level is provided (MVP difficulty selection), use it.
-      // Otherwise fall back to progressive unlocks.
       const unlocked = Math.min(
         MAX_LEVEL,
         1 + Math.floor(runs.length / RUNS_PER_LEVEL)
-      );
-      setLevel(forcedLevel ?? unlocked);
+      ) as 1 | 2 | 3 | 4;
+      
+      setLevel((forcedLevel ?? unlocked) as 1 | 2 | 3 | 4);
+      
     })();
   }, [forcedLevel]);
 
@@ -62,7 +62,8 @@ export default function GoNoGoGame({
 
   const xpProgress = level === MAX_LEVEL ? 1 : runsIntoLevel / RUNS_PER_LEVEL;
 
-  const speedLevel = level === 1 ? 1 : level === 2 ? 2 : 3;
+  const speedLevel: 1 | 2 | 3 =
+  level === 1 ? 1 : level === 2 ? 2 : 3;
 
   const diff = useMemo(() => difficultyForLevel(speedLevel), [speedLevel]);
   const mode = useMemo(() => getGoNoGoMode(level), [level]);
@@ -168,12 +169,21 @@ export default function GoNoGoGame({
       accuracy: stats.accuracy,
       avgReactionMs: stats.avgReactionMs,
       focusScore: stats.focusScore,
+    
+      // Backward compatibility
       difficultyLevel: level,
+    
+      // New, correct meaning
+      level,
+      speedLevel,
+      modeId: mode.id,
+    
       goCorrect: stats.goCorrect,
       goWrong: stats.goWrong,
       noGoCorrect: stats.noGoCorrect,
       noGoWrong: stats.noGoWrong,
     };
+    
 
     const runs = await getJSON<GameRun[]>(Keys.runs, []);
     const newRuns = [run, ...runs];
