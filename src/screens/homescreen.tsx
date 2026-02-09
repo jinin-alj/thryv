@@ -124,9 +124,7 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={{ height: spacing.md }} />
 
-        <Text style={[styles.title, { color: theme.text }]}>
-          Welcome back
-        </Text>
+        <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
         <Text style={[styles.sub, { color: theme.muted }]}>
           Prime your brain. Then crush the study block.
         </Text>
@@ -135,9 +133,7 @@ export default function HomeScreen({ navigation }: Props) {
 
         {/* Today context */}
         <View style={styles.todayCard}>
-          <Text style={[styles.todayLabel, { color: theme.muted }]}>
-            Today
-          </Text>
+          <Text style={[styles.todayLabel, { color: theme.muted }]}>Today</Text>
           <Text style={[styles.todayText, { color: theme.text }]}>
             {lastRun
               ? "Keep the momentum — one quick round can sharpen your focus."
@@ -175,9 +171,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={{ height: spacing.lg }} />
 
         {/* Actions */}
-        <Text style={[styles.sectionLabel, { color: theme.muted }]}>
-          Play
-        </Text>
+        <Text style={[styles.sectionLabel, { color: theme.muted }]}>Play</Text>
 
         <View style={{ height: spacing.sm }} />
 
@@ -193,6 +187,16 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={[styles.sectionLabel, { color: theme.muted }]}>
           Quick actions
         </Text>
+
+        <View style={{ height: spacing.sm }} />
+
+        {/* ✅ NEW BUTTON */}
+        <PrimaryButton
+          title="Study Rooms"
+          onPress={() => navigation.navigate("StudyRooms")}
+          style={styles.secondaryBtn}
+          textStyle={styles.secondaryBtnText}
+        />
 
         <View style={{ height: spacing.sm }} />
 
