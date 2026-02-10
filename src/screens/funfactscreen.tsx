@@ -148,7 +148,6 @@ const makeStyles = (theme: any) =>
     content: {
       flexGrow: 1,
       padding: spacing.xl,
-      justifyContent: "center",
     },
 
     blobTop: {

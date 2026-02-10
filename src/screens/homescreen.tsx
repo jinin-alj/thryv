@@ -14,6 +14,7 @@ import { spacing } from "../theme/spacing";
 import PrimaryButton from "../ui/primarybutton";
 import { getJSON, Keys, Profile, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BrainMap, { BrainRegion } from "../ui/BrainMap";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -88,16 +89,16 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={{ height: spacing.lg }} />
 
-        {/* Actions */}
+        {/* Brain Map */}
         <Text style={[styles.sectionLabel, { color: theme.muted }]}>Play</Text>
 
-        <View style={{ height: spacing.sm }} />
+        <View style={{ height: spacing.md }} />
 
-        <PrimaryButton
-          title="Games"
-          onPress={() => navigation.navigate("Games")}
-          style={styles.primaryBtn}
-          textStyle={styles.primaryBtnText}
+        <BrainMap
+          onRegionPress={(region: BrainRegion) => {
+            navigation.navigate("Category", { region });
+          }}
+          size={280}
         />
 
         <View style={{ height: spacing.lg }} />

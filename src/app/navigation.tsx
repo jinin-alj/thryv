@@ -14,6 +14,13 @@ import ResultsScreen from "../screens/resultsscreen";
 import OnboardingScreen from "../screens/onboardingscreen";
 import LoginScreen from "../screens/loginscreen";
 import SignUpScreen from "../screens/signupscreen";
+import CategoryScreen from "../screens/categoryscreen";
+import NBackDifficultyScreen from "../screens/nback_difficultyscreen";
+import NBackBlocksScreen from "../screens/nback_blocksscreen";
+import NBackGameScreen from "../screens/nback_gamescreen";
+import VSDifficultyScreen from "../screens/vs_difficultyscreen";
+import VSBlocksScreen from "../screens/vs_blocksscreen";
+import VSGameScreen from "../screens/vs_gamescreen";
 
 // ✅ NEW Study Rooms screens
 import StudyRoomsScreen from "../screens/studyroomsscreen";
@@ -32,6 +39,13 @@ export type RootStackParamList = {
     blockId: number;
   } | undefined;
 
+  Category: { region: string };
+  NBackDifficulty: undefined;
+  NBackBlocks: { tier: 1 | 2 | 3 | 4 };
+  NBackGame: { level: 1 | 2 | 3 | 4; tier: 1 | 2 | 3 | 4; blockId: number } | undefined;
+  VisualSearchDifficulty: undefined;
+  VisualSearchBlocks: { tier: 1 | 2 | 3 | 4 };
+  VisualSearchGame: { level: 1 | 2 | 3 | 4; tier: 1 | 2 | 3 | 4; blockId: number } | undefined;
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
@@ -86,6 +100,13 @@ export default function RootNavigator() {
 
       <Stack.Screen name="GoNoGo" component={GameScreen} />
 
+      <Stack.Screen name="Category" component={CategoryScreen} />
+      <Stack.Screen name="NBackDifficulty" component={NBackDifficultyScreen} />
+      <Stack.Screen name="NBackBlocks" component={NBackBlocksScreen} />
+      <Stack.Screen name="NBackGame" component={NBackGameScreen} />
+      <Stack.Screen name="VisualSearchDifficulty" component={VSDifficultyScreen} />
+      <Stack.Screen name="VisualSearchBlocks" component={VSBlocksScreen} />
+      <Stack.Screen name="VisualSearchGame" component={VSGameScreen} />
       <Stack.Screen name="FocusTimer" component={FocusTimerScreen} />
       <Stack.Screen name="FunFacts" component={FunFactsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
