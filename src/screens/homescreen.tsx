@@ -120,7 +120,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={{ height: spacing.sm }} />
 
         <PrimaryButton
-          title="Focus Timer"
+          title="Focus Session"
           onPress={() => navigation.navigate("FocusTimer")}
           style={styles.secondaryBtn}
           textStyle={styles.secondaryBtnText}

@@ -21,6 +21,12 @@ import NBackGameScreen from "../screens/nback_gamescreen";
 import VSDifficultyScreen from "../screens/vs_difficultyscreen";
 import VSBlocksScreen from "../screens/vs_blocksscreen";
 import VSGameScreen from "../screens/vs_gamescreen";
+import PrepTimePickerScreen from "../screens/preptimepicker_screen";
+import BrainPrepScreen from "../screens/brainprep_screen";
+import SessionCategoryScreen from "../screens/sessioncategory_screen";
+import FocusCountdownScreen from "../screens/focuscountdown_screen";
+import SessionBreakScreen from "../screens/sessionbreak_screen";
+import SessionSummaryScreen from "../screens/sessionsummary_screen";
 
 // ✅ NEW Study Rooms screens
 import StudyRoomsScreen from "../screens/studyroomsscreen";
@@ -46,6 +52,12 @@ export type RootStackParamList = {
   VisualSearchDifficulty: undefined;
   VisualSearchBlocks: { tier: 1 | 2 | 3 | 4 };
   VisualSearchGame: { level: 1 | 2 | 3 | 4; tier: 1 | 2 | 3 | 4; blockId: number } | undefined;
+  PrepTimePicker: any;
+  BrainPrep: any;
+  SessionCategory: any;
+  FocusCountdown: any;
+  SessionBreak: any;
+  SessionSummary: any;
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
@@ -107,6 +119,12 @@ export default function RootNavigator() {
       <Stack.Screen name="VisualSearchDifficulty" component={VSDifficultyScreen} />
       <Stack.Screen name="VisualSearchBlocks" component={VSBlocksScreen} />
       <Stack.Screen name="VisualSearchGame" component={VSGameScreen} />
+      <Stack.Screen name="PrepTimePicker" component={PrepTimePickerScreen} />
+      <Stack.Screen name="BrainPrep" component={BrainPrepScreen} />
+      <Stack.Screen name="SessionCategory" component={SessionCategoryScreen} />
+      <Stack.Screen name="FocusCountdown" component={FocusCountdownScreen} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="SessionBreak" component={SessionBreakScreen} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="SessionSummary" component={SessionSummaryScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="FocusTimer" component={FocusTimerScreen} />
       <Stack.Screen name="FunFacts" component={FunFactsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
