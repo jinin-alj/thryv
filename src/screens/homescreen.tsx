@@ -15,10 +15,6 @@ import PrimaryButton from "../ui/primarybutton";
 import { getJSON, Keys, Profile, GameRun } from "../storage/local";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { WebView } from "react-native-webview";
-import { Asset } from "expo-asset";
-import * as FileSystem from "expo-file-system/legacy";
-
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 const PALETTE = {
@@ -33,61 +29,10 @@ export default function HomeScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [lastRun, setLastRun] = useState<GameRun | null>(null);
-  const [brainHtml, setBrainHtml] = useState<string | null>(null);
-
   useEffect(() => {
     (async () => {
       setProfile(await getJSON(Keys.profile, null));
       setLastRun(await getJSON(Keys.lastRun, null));
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const modelAsset = Asset.fromModule(
-          require("../models/human_brain.glb")
-        );
-        await modelAsset.downloadAsync();
-
-        const localUri = modelAsset.localUri;
-        if (!localUri) throw new Error("Model localUri is null");
-
-        const base64 = await FileSystem.readAsStringAsync(localUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        const dataUri = `data:model/gltf-binary;base64,${base64}`;
-
-        const html = `<!doctype html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <style>
-      html, body { margin:0; height:100%; background: transparent; }
-      model-viewer { width:100%; height:100%; background: transparent; }
-    </style>
-  </head>
-  <body>
-    <model-viewer
-      src="${dataUri}"
-      camera-controls
-      auto-rotate
-      rotation-per-second="18deg"
-      interaction-prompt="none"
-      shadow-intensity="0"
-      exposure="1"
-      style="--progress-bar-color: transparent;"
-    ></model-viewer>
-  </body>
-</html>`;
-
-        setBrainHtml(html);
-      } catch (e) {
-        console.log("Brain viewer error:", e);
-        setBrainHtml(null);
-      }
     })();
   }, []);
 
@@ -143,33 +88,6 @@ export default function HomeScreen({ navigation }: Props) {
               ? "Keep the momentum — one quick round can sharpen your focus."
               : "No sessions yet. Start with a quick round to warm up your focus."}
           </Text>
-        </View>
-
-        <View style={{ height: spacing.lg }} />
-
-        {/* Brain card */}
-        <View style={styles.brainCard}>
-          <View style={styles.brainTag}>
-            <Text style={styles.brainTagText}>Explore the brain</Text>
-          </View>
-
-          {brainHtml ? (
-            <WebView
-              originWhitelist={["*"]}
-              source={{ html: brainHtml }}
-              style={{ flex: 1, backgroundColor: "transparent" }}
-              javaScriptEnabled
-              domStorageEnabled
-              scrollEnabled={false}
-              allowsInlineMediaPlayback
-            />
-          ) : (
-            <View style={styles.brainFallback}>
-              <Text style={{ color: theme.muted, fontWeight: "600" }}>
-                Loading brain…
-              </Text>
-            </View>
-          )}
         </View>
 
         <View style={{ height: spacing.lg }} />
@@ -314,33 +232,6 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     letterSpacing: 0.6,
     textTransform: "uppercase",
-  },
-
-  brainCard: {
-    height: 240,
-    borderRadius: 24,
-    overflow: "hidden",
-    backgroundColor: "rgba(209, 225, 225, 0.5)",
-  },
-  brainTag: {
-    position: "absolute",
-    top: 14,
-    left: 14,
-    zIndex: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: "rgba(52, 118, 121, 0.14)",
-  },
-  brainTagText: {
-    color: PALETTE.deep,
-    fontWeight: "900",
-    fontSize: 12,
-  },
-  brainFallback: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   primaryBtn: {

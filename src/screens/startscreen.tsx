@@ -74,7 +74,7 @@ export default function StartScreen({ navigation }: Props) {
           />
 
           <Text style={[styles.title, { color: theme.text }]}>
-            Welcome to Thryve
+            Welcome to Thryv
           </Text>
 
           <Text style={[styles.subtitle, { color: theme.muted }]}>
