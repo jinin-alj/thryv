@@ -1,9 +1,13 @@
-import React, { useMemo, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { spacing } from "../theme/spacing";
 import { useAppTheme } from "../theme/themeContext";
 import PrimaryButton from "../ui/primarybutton";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { WebView } from "react-native-webview";
+import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system/legacy";
 
 const facts = [
   "Attention is a limited resource — doom-scrolling makes refocusing harder.",
@@ -23,9 +27,59 @@ const PALETTE = {
 export default function FunFactScreen() {
   const { theme } = useAppTheme();
   const [seed, setSeed] = useState(0);
+  const [brainHtml, setBrainHtml] = useState<string | null>(null);
 
   const fact = useMemo(() => facts[seed % facts.length], [seed]);
   const styles = makeStyles(theme);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const modelAsset = Asset.fromModule(
+          require("../models/human_brain.glb")
+        );
+        await modelAsset.downloadAsync();
+
+        const localUri = modelAsset.localUri;
+        if (!localUri) throw new Error("Model localUri is null");
+
+        const base64 = await FileSystem.readAsStringAsync(localUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const dataUri = `data:model/gltf-binary;base64,${base64}`;
+
+        const html = `<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+      html, body { margin:0; height:100%; background: transparent; }
+      model-viewer { width:100%; height:100%; background: transparent; }
+    </style>
+  </head>
+  <body>
+    <model-viewer
+      src="${dataUri}"
+      camera-controls
+      auto-rotate
+      rotation-per-second="18deg"
+      interaction-prompt="none"
+      shadow-intensity="0"
+      exposure="1"
+      style="--progress-bar-color: transparent;"
+    ></model-viewer>
+  </body>
+</html>`;
+
+        setBrainHtml(html);
+      } catch (e) {
+        console.log("Brain viewer error:", e);
+        setBrainHtml(null);
+      }
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.wrap}>
@@ -33,19 +87,53 @@ export default function FunFactScreen() {
       <View style={styles.blobRight} />
       <View style={styles.blobBottom} />
 
-      <Text style={styles.h}>Fun facts</Text>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.h}>Fun facts</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.p}>{fact}</Text>
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.p}>{fact}</Text>
+        </View>
 
-      <View style={{ height: spacing.lg }} />
-      <PrimaryButton
-        title="New fact"
-        onPress={() => setSeed((s) => s + 1)}
-        style={styles.primaryBtn}
-        textStyle={styles.primaryBtnText}
-      />
+        <View style={{ height: spacing.lg }} />
+        <PrimaryButton
+          title="New fact"
+          onPress={() => setSeed((s) => s + 1)}
+          style={styles.primaryBtn}
+          textStyle={styles.primaryBtnText}
+        />
+
+        <View style={{ height: spacing.xl }} />
+
+        {/* Brain 3D model */}
+        <View style={styles.brainCard}>
+          <View style={styles.brainTag}>
+            <Text style={styles.brainTagText}>Explore the brain</Text>
+          </View>
+
+          {brainHtml ? (
+            <WebView
+              originWhitelist={["*"]}
+              source={{ html: brainHtml }}
+              style={{ flex: 1, backgroundColor: "transparent" }}
+              javaScriptEnabled
+              domStorageEnabled
+              scrollEnabled={false}
+              allowsInlineMediaPlayback
+            />
+          ) : (
+            <View style={styles.brainFallback}>
+              <Text style={{ color: theme.muted, fontWeight: "600" }}>
+                Loading brain…
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -55,8 +143,11 @@ const makeStyles = (theme: any) =>
     wrap: {
       flex: 1,
       backgroundColor: theme.background,
+    },
+
+    content: {
+      flexGrow: 1,
       padding: spacing.xl,
-      justifyContent: "center",
     },
 
     blobTop: {
@@ -105,6 +196,33 @@ const makeStyles = (theme: any) =>
     },
 
     p: { color: theme.text, fontSize: 16, fontWeight: "700", lineHeight: 24 },
+
+    brainCard: {
+      height: 240,
+      borderRadius: 24,
+      overflow: "hidden",
+      backgroundColor: "rgba(209, 225, 225, 0.5)",
+    },
+    brainTag: {
+      position: "absolute",
+      top: 14,
+      left: 14,
+      zIndex: 2,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: "rgba(52, 118, 121, 0.14)",
+    },
+    brainTagText: {
+      color: PALETTE.deep,
+      fontWeight: "900",
+      fontSize: 12,
+    },
+    brainFallback: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
     primaryBtn: {
       backgroundColor: "rgba(163, 193, 195, 0.45)",
