@@ -15,6 +15,10 @@ import OnboardingScreen from "../screens/onboardingscreen";
 import LoginScreen from "../screens/loginscreen";
 import SignUpScreen from "../screens/signupscreen";
 
+// ✅ NEW Study Rooms screens
+import StudyRoomsScreen from "../screens/studyroomsscreen";
+import StudyRoomSessionScreen from "../screens/studyroomsessionscreen";
+
 export type RootStackParamList = {
   Start: undefined;
   Home: undefined;
@@ -31,6 +35,10 @@ export type RootStackParamList = {
   FocusTimer: undefined;
   FunFacts: undefined;
   Profile: undefined;
+
+  // ✅ NEW routes
+  StudyRooms: undefined;
+  StudyRoom: { roomId: string };
 
   Results:
     | {
@@ -62,10 +70,7 @@ export default function RootNavigator() {
         options={{ gestureEnabled: false }}
       />
 
-      <Stack.Screen
-        name="Onboarding"
-        component={OnboardingScreen}
-      />
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
 
       <Stack.Screen
         name="Home"
@@ -75,35 +80,24 @@ export default function RootNavigator() {
 
       <Stack.Screen name="Games" component={GamesLandingScreen} />
 
-      <Stack.Screen
-        name="GoNoGoDifficulty"
-        component={GoNoGoDifficultyScreen}
-      />
+      <Stack.Screen name="GoNoGoDifficulty" component={GoNoGoDifficultyScreen} />
 
-      <Stack.Screen
-        name="GoNoGoBlocks"
-        component={GoNoGoBlocksScreen}
-      />
+      <Stack.Screen name="GoNoGoBlocks" component={GoNoGoBlocksScreen} />
 
-      <Stack.Screen
-        name="GoNoGo"
-        component={GameScreen}
-      />
+      <Stack.Screen name="GoNoGo" component={GameScreen} />
 
       <Stack.Screen name="FocusTimer" component={FocusTimerScreen} />
       <Stack.Screen name="FunFacts" component={FunFactsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Results" component={ResultsScreen} />
 
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-      />
+      {/* ✅ NEW Study Rooms */}
+      <Stack.Screen name="StudyRooms" component={StudyRoomsScreen} />
+      <Stack.Screen name="StudyRoom" component={StudyRoomSessionScreen} />
 
-      <Stack.Screen
-        name="Signup"
-        component={SignUpScreen}
-      />
+      <Stack.Screen name="Login" component={LoginScreen} />
+
+      <Stack.Screen name="Signup" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }

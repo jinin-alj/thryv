@@ -78,7 +78,7 @@ export default function StartScreen({ navigation }: Props) {
           </Text>
 
           <Text style={[styles.subtitle, { color: theme.muted }]}>
-            Designed with your mind in mind.
+            Thryv before you dive.
           </Text>
         </View>
 
