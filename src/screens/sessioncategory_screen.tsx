@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
 import { BrainRegion } from "../ui/BrainMap";
+import { useSessionTimer } from "../context/SessionTimerContext";
 
 const PALETTE = { deep: "#347679", mist: "#d1e1e1", light: "#a3c1c3", soft: "#74a3a5" };
 
@@ -45,6 +46,16 @@ export default function SessionCategoryScreen({ navigation, route }: any) {
   const config = route.params ?? {};
   const region: BrainRegion = config.region ?? "frontal";
   const data = CATS[region];
+  const sessionTimer = useSessionTimer();
+  const prepStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (config.phase !== "prep" || !sessionTimer?.startPrep || prepStartedRef.current) return;
+    prepStartedRef.current = true;
+    sessionTimer.startPrep(config, () => {
+      navigation.replace("FocusCountdown", { ...config, currentCycle: 1 });
+    });
+  }, [config.phase, sessionTimer]);
 
   return (
     <SafeAreaView style={styles.wrap}>
@@ -65,9 +76,8 @@ export default function SessionCategoryScreen({ navigation, route }: any) {
                 if (game.route) {
                   // Navigate to game -- after game finishes, the session orchestrator
                   // will transition to FocusCountdown. For now, navigate to the game.
-                  navigation.navigate(game.route);
-                  // TODO: After prep timer ends, auto-transition to FocusCountdown
-                  // This will be handled by the session orchestrator in a future iteration
+                  // Pass session config through so region and session state persist
+                  navigation.navigate(game.route, { sessionConfig: config });
                 }
               }}
               style={({ pressed }) => [styles.gameCard, { opacity: disabled ? 0.55 : pressed ? 0.85 : 1 }]}>

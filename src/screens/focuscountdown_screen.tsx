@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, Text, StyleSheet, Pressable, Dimensions } from "react-native";
 import { useAppTheme } from "../theme/themeContext";
 import { spacing } from "../theme/spacing";
@@ -23,22 +23,23 @@ export default function FocusCountdownScreen({ navigation, route }: any) {
 
   const [remaining, setRemaining] = useState(focusDuration);
   const [paused, setPaused] = useState(false);
+  const [done, setDone] = useState(false);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function clear() { if (tickRef.current) clearInterval(tickRef.current); tickRef.current = null; }
+  function clear() {
+    if (tickRef.current) clearInterval(tickRef.current);
+    tickRef.current = null;
+  }
 
+  // Tick timer
   useEffect(() => {
     clear();
-    if (!paused) {
+    if (!paused && !done) {
       tickRef.current = setInterval(() => {
         setRemaining((r) => {
           if (r <= 1) {
             clear();
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            // Focus block done -> go to break
-            setTimeout(() => {
-              navigation.replace("SessionBreak", { ...config, currentCycle });
-            }, 300);
+            setDone(true);
             return 0;
           }
           return r - 1;
@@ -46,7 +47,18 @@ export default function FocusCountdownScreen({ navigation, route }: any) {
       }, 1000);
     }
     return clear;
-  }, [paused]);
+  }, [paused, done]);
+
+  // Handle completion separately (avoids stale closure)
+  useEffect(() => {
+    if (done) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const timer = setTimeout(() => {
+        navigation.replace("SessionBreak", { ...config, currentCycle });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [done]);
 
   const progress = 1 - remaining / focusDuration;
 

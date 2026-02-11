@@ -25,7 +25,7 @@ export default function VSGameScreen({ navigation, route }: any) {
   async function handleFinished() {
     const lastRun = await getJSON<any>(Keys.lastRun, null);
     if (lastRun) {
-      navigation.replace("Results", { runId: lastRun.id, tier, blockId });
+      navigation.replace("Results", { runId: lastRun.id, tier, blockId, game: lastRun.game ?? "visualsearch" });
     } else {
       navigation.replace("VisualSearchBlocks", { tier });
     }

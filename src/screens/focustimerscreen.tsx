@@ -447,22 +447,17 @@ export default function FocusTimerScreen({ navigation }: Props) {
 
           {/* ===== Controls ===== */}
           <PrimaryButton
-            title={running ? "Pause" : "Start"}
+            title="Start Focus Session"
             onPress={() => {
-              if (!running && remaining === (mode === "FOCUS" ? focusDuration : mode === "BREAK" ? breakDuration : longBreakDuration)) {
-                // Fresh start -> navigate to prep flow
-                navigation.navigate("PrepTimePicker", {
-                  focusDuration,
-                  breakDuration,
-                  cyclesBeforeLongBreak,
-                  longBreakDuration,
-                  presetId: selectedPresetId,
-                  totalCycles: cyclesBeforeLongBreak > 0 ? cyclesBeforeLongBreak : 4,
-                  currentCycle: 1,
-                });
-              } else {
-                setRunning((r) => !r);
-              }
+              navigation.navigate("PrepTimePicker", {
+                focusDuration,
+                breakDuration,
+                cyclesBeforeLongBreak,
+                longBreakDuration,
+                presetId: selectedPresetId,
+                totalCycles: cyclesBeforeLongBreak > 0 ? cyclesBeforeLongBreak : 4,
+                currentCycle: 1,
+              });
             }}
             style={styles.primaryBtn}
             textStyle={styles.primaryBtnText}

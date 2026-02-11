@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSessionTimer } from "../context/SessionTimerContext";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppTheme } from "../theme/themeContext";
@@ -42,32 +43,23 @@ export default function SessionBreakScreen({ navigation, route }: any) {
   // Check if session is complete
   const isSessionDone = currentCycle >= totalCycles;
 
-  const [remaining, setRemaining] = useState(thisDuration);
   const [showingAdvice, setShowingAdvice] = useState(isLongBreak);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const breakStartedRef = useRef(false);
+  const sessionTimer = useSessionTimer();
 
-  function clear() { if (tickRef.current) clearInterval(tickRef.current); tickRef.current = null; }
+  const onBreakEnd = () => {
+    if (config.currentCycle >= (config.totalCycles ?? 4)) {
+      navigation.replace("SessionSummary", config);
+    } else {
+      navigation.replace("FocusCountdown", { ...config, currentCycle: (config.currentCycle ?? 1) + 1 });
+    }
+  };
 
-  // Break countdown
   useEffect(() => {
-    if (showingAdvice) return; // Don't start timer until advice is dismissed
-    clear();
-    tickRef.current = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          clear();
-          if (isSessionDone) {
-            navigation.replace("SessionSummary", config);
-          } else {
-            // Go to next focus block
-            navigation.replace("FocusCountdown", { ...config, currentCycle: currentCycle + 1 });
-          }
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return clear;
+    if (showingAdvice) return;
+    if (breakStartedRef.current) return;
+    breakStartedRef.current = true;
+    sessionTimer?.startBreak?.(config, onBreakEnd, thisDuration);
   }, [showingAdvice]);
 
   if (isSessionDone) {
@@ -112,7 +104,7 @@ export default function SessionBreakScreen({ navigation, route }: any) {
   return (
     <SafeAreaView style={styles.wrap}>
       <Text style={styles.h}>{isLongBreak ? "Long Break" : "Break"}</Text>
-      <Text style={styles.timeSmall}>{fmt(remaining)} remaining</Text>
+      <Text style={styles.timeSmall}>{sessionTimer ? fmt(sessionTimer.remaining) : fmt(thisDuration)} remaining</Text>
 
       <View style={{ height: spacing.xl }} />
 
@@ -134,7 +126,7 @@ export default function SessionBreakScreen({ navigation, route }: any) {
         style={styles.optionBtn} textStyle={styles.optionText} />
 
       <View style={{ flex: 1 }} />
-      <Pressable onPress={() => navigation.replace("Home")}>
+      <Pressable onPress={() => { sessionTimer?.stop?.(); navigation.replace("Home"); }}>
         <Text style={styles.endText}>End session</Text>
       </Pressable>
       <View style={{ height: spacing.lg }} />

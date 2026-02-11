@@ -59,7 +59,7 @@ export type Profile = {
 
 export type GameRun = {
   id: string;
-  game: "gonogo";
+  game: "gonogo" | "nback" | "visualsearch";
   startedAt: string;
   endedAt: string;
   accuracy: number; 

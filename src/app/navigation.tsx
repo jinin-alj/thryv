@@ -71,6 +71,7 @@ export type RootStackParamList = {
         runId: string;
         tier?: 1 | 2 | 3 | 4;
         blockId?: number;
+        game?: "gonogo" | "nback" | "visualsearch";
       }
     | undefined;
 
