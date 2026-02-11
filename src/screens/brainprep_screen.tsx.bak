@@ -26,7 +26,6 @@ export default function BrainPrepScreen({ navigation, route }: any) {
           navigation.navigate("SessionCategory", {
             ...sessionConfig,
             region,
-            phase: "prep",
           });
         }}
         size={300}

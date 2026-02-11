@@ -25,7 +25,7 @@ export default function NBackGameScreen({ navigation, route }: any) {
   async function handleFinished() {
     const lastRun = await getJSON<any>(Keys.lastRun, null);
     if (lastRun) {
-      navigation.replace("Results", { runId: lastRun.id, tier, blockId });
+      navigation.replace("Results", { runId: lastRun.id, tier, blockId, game: lastRun.game ?? "nback" });
     } else {
       navigation.replace("NBackBlocks", { tier });
     }

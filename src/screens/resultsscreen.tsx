@@ -40,37 +40,27 @@ export default function ResultsScreen({ navigation, route }: Props) {
     })();
   }, [user]);
 
+  // Prefer game from navigation params (source of truth from who navigated here)
+  const gameType = (route.params as any)?.game ?? run?.game ?? "gonogo";
+
+  const GAME_ROUTES: Record<string, { play: string; blocks: string }> = {
+    gonogo: { play: "GoNoGo", blocks: "GoNoGoBlocks" },
+    nback: { play: "NBackGame", blocks: "NBackBlocks" },
+    visualsearch: { play: "VisualSearchGame", blocks: "VisualSearchBlocks" },
+  };
+
   async function handleNextBlock() {
-    const progress = await getGoNoGoProgress();
-
-    const tierKey =
-      tier === 1
-        ? "beginner"
-        : tier === 2
-        ? "intermediate"
-        : tier === 3
-        ? "advanced"
-        : "expert";
-
-    const tierData = progress[tierKey];
-
-    const nextBlock = tierData.blocks.find(
-      (b) => b.id === blockId + 1
-    );
-
-    if (nextBlock) {
-      navigation.replace("GoNoGo", {
-        level: tier,
-        tier,
-        blockId: blockId + 1,
-      });
-    } else {
-      navigation.replace("GoNoGoBlocks", { tier });
-    }
+    const routes = GAME_ROUTES[gameType] ?? GAME_ROUTES.gonogo;
+    navigation.replace(routes.play, {
+      level: tier,
+      tier,
+      blockId: blockId + 1,
+    });
   }
 
   function handleBackToBlocks() {
-    navigation.replace("GoNoGoBlocks", { tier });
+    const routes = GAME_ROUTES[gameType] ?? GAME_ROUTES.gonogo;
+    navigation.replace(routes.blocks, { tier });
   }
 
   if (!run) {

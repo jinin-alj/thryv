@@ -47,6 +47,7 @@ export default function GameScreen({ navigation, route }: Props) {
         runId: lastRun.id,
         tier,
         blockId,
+        game: lastRun.game ?? "gonogo",
       });
     } else {
       navigation.replace("GoNoGoBlocks", { tier });

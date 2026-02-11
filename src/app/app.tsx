@@ -4,7 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, useAppTheme } from "../theme/themeContext";
 import RootNavigator from "./navigation";
 import { AuthProvider } from "../auth/AuthContext";
-
+import { SessionTimerProvider } from "../context/SessionTimerContext";
 
 function ThemedNavigation() {
   const { theme } = useAppTheme();
@@ -24,7 +24,9 @@ function ThemedNavigation() {
 
   return (
     <NavigationContainer theme={navTheme}>
-      <RootNavigator />
+      <SessionTimerProvider>
+        <RootNavigator />
+      </SessionTimerProvider>
     </NavigationContainer>
   );
 }
